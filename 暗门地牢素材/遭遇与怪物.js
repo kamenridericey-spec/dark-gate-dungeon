@@ -1,0 +1,541 @@
+// Card data from the V0.6 encounter table and V0.7.3 monster and loot table.
+globalThis.encounterTable=[
+  {
+    "id": "ENC-I-01",
+    "name": "宝箱后的呼吸",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 8,
+    "prefer": "宝藏",
+    "text": "战斗。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-02",
+    "name": "倒悬巢穴",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 8,
+    "prefer": "奇遇",
+    "text": "战斗。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-03",
+    "name": "饮水的影子",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 12,
+    "prefer": "恢复",
+    "text": "战斗。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-04",
+    "name": "数错的脚步",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 12,
+    "prefer": "宝藏",
+    "text": "战斗。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-05",
+    "name": "不认钥匙的锁",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 8,
+    "prefer": "奇遇",
+    "text": "成功：承担者恢复1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-06",
+    "name": "漏气的疗养舱",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 8,
+    "prefer": "恢复",
+    "text": "失败：承担者弃置1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-07",
+    "name": "齿轮里的欠条",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 12,
+    "prefer": "宝藏",
+    "text": "失败：承担者弃置1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-08",
+    "name": "会害羞的门",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 12,
+    "prefer": "奇遇",
+    "text": "失败：承担者失魂1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-09",
+    "name": "绷带摊",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 8,
+    "prefer": "恢复",
+    "text": "易物。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-10",
+    "name": "藏品估价师",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 8,
+    "prefer": "宝藏",
+    "text": "易物。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-11",
+    "name": "换名字的商人",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 12,
+    "prefer": "奇遇",
+    "text": "易物。成功：承担者恢复1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-I-12",
+    "name": "搬箱抵账",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 12,
+    "prefer": "恢复",
+    "text": "易物。成功：承担者恢复1。",
+    "tier": 1
+  },
+  {
+    "id": "ENC-II-01",
+    "name": "陈列柜破裂",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 12,
+    "prefer": "宝藏",
+    "text": "战斗。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-02",
+    "name": "回声捕食场",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 12,
+    "prefer": "奇遇",
+    "text": "战斗。失败追加：承担者弃置1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-03",
+    "name": "输液管深处",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "战斗。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-04",
+    "name": "第五个倒影",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 16,
+    "prefer": "宝藏",
+    "text": "战斗。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-05",
+    "name": "折叠楼梯",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 12,
+    "prefer": "奇遇",
+    "text": "失败：承担者弃置1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-06",
+    "name": "逆流泵站",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 12,
+    "prefer": "恢复",
+    "text": "成功：一人恢复1。失败：承担者失魂1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-07",
+    "name": "活字保险柜",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 16,
+    "prefer": "宝藏",
+    "text": "失败：承担者弃置1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-08",
+    "name": "审问镜",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 16,
+    "prefer": "奇遇",
+    "text": "失败：承担者失魂1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-09",
+    "name": "临床交换所",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 12,
+    "prefer": "恢复",
+    "text": "易物。成功：一人恢复1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-10",
+    "name": "骨质拍卖台",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 12,
+    "prefer": "宝藏",
+    "text": "易物。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-11",
+    "name": "回声典当行",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 16,
+    "prefer": "奇遇",
+    "text": "易物。成功：一人恢复1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-II-12",
+    "name": "举鼎议价",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "易物。成功：承担者恢复1。",
+    "tier": 2
+  },
+  {
+    "id": "ENC-III-01",
+    "name": "吞金长廊",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "宝藏",
+    "text": "战斗。失败追加：承担者弃置1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-02",
+    "name": "无声围猎",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "奇遇",
+    "text": "战斗。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-03",
+    "name": "心脏泵房",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "战斗。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-04",
+    "name": "梦中的猎手",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 12,
+    "prefer": "宝藏",
+    "text": "战斗。失败追加：承担者弃置1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-05",
+    "name": "遗忘校准仪",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 16,
+    "prefer": "奇遇",
+    "text": "失败：承担者弃置2。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-06",
+    "name": "第二颗心脏",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "成功：一人恢复2。失败：承担者失魂1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-07",
+    "name": "反向保险库",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 16,
+    "prefer": "宝藏",
+    "text": "失败：承担者失魂1；承担者弃置1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-08",
+    "name": "王座的面试",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 12,
+    "prefer": "奇遇",
+    "text": "失败：承担者失魂1；承担者弃置1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-09",
+    "name": "永生试用品",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "易物。成功：一人恢复2。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-10",
+    "name": "王室清仓",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 16,
+    "prefer": "宝藏",
+    "text": "易物。成功：一人恢复1。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-11",
+    "name": "昨日回购站",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 16,
+    "prefer": "奇遇",
+    "text": "易物。成功：一人恢复2。",
+    "tier": 3
+  },
+  {
+    "id": "ENC-III-12",
+    "name": "抬走整间店",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 16,
+    "prefer": "恢复",
+    "text": "易物。成功：承担者恢复2。",
+    "tier": 3
+  }
+];
+globalThis.monsters={
+  "1": [
+    {
+      "id": "MON-I-01",
+      "name": "打嗝蛙",
+      "ability": "无附加能力",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "会打嗝的胃囊",
+        "equipment": false,
+        "timing": "掷后",
+        "text": "重投1，必须接受新值。",
+        "effect": "reroll"
+      }
+    },
+    {
+      "id": "MON-I-02",
+      "name": "反穿蜥",
+      "ability": "无附加能力",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "反穿的鳞片",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "一人护魂1。",
+        "effect": "guard"
+      }
+    },
+    {
+      "id": "MON-I-03",
+      "name": "报丧眼",
+      "ability": "无附加能力",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "唱反调的眼球",
+        "equipment": false,
+        "timing": "准备",
+        "text": "展示收获堆顶1张，原位放回。",
+        "effect": "peek"
+      }
+    },
+    {
+      "id": "MON-I-04",
+      "name": "借手虫",
+      "ability": "无附加能力",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "借来的第三只手",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "承担者护魂 2。",
+        "effect": "guard2"
+      }
+    }
+  ],
+  "2": [
+    {
+      "id": "MON-II-01",
+      "name": "弹簧鱿",
+      "ability": "揭晓。压势1。",
+      "pressure": 1,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "弹簧触须",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "增势1，一人护魂1。",
+        "effect": "boostGuard"
+      }
+    },
+    {
+      "id": "MON-II-02",
+      "name": "灯笼胃",
+      "ability": "失败。承担者弃置1。",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 1,
+      "loot": {
+        "name": "肚里的小太阳",
+        "equipment": false,
+        "timing": "掷前",
+        "text": "一人恢复2。",
+        "effect": "heal2"
+      }
+    },
+    {
+      "id": "MON-II-03",
+      "name": "假面鹿",
+      "ability": "揭晓。若检定属性匹配承担者专长，压势1。",
+      "pressure": 1,
+      "matchOnly": true,
+      "cost": 0,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "不合脸的面具",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "逆转。一人护魂1。",
+        "effect": "reverseGuard"
+      }
+    }
+  ],
+  "3": [
+    {
+      "id": "MON-III-01",
+      "name": "王冠水母",
+      "ability": "揭晓。压势1。胜利代价。承担者失魂1。",
+      "pressure": 1,
+      "matchOnly": false,
+      "cost": 1,
+      "loss": 0,
+      "drop": 0,
+      "loot": {
+        "name": "软塌塌的王冠",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "本次玩家优势来源不足以超过城主时，增加至比城主多1。",
+        "effect": "crown"
+      }
+    },
+    {
+      "id": "MON-III-02",
+      "name": "棺材螺",
+      "ability": "胜利代价。承担者失魂1。失败。承担者再失魂1。",
+      "pressure": 0,
+      "matchOnly": false,
+      "cost": 1,
+      "loss": 1,
+      "drop": 0,
+      "loot": {
+        "name": "随身小棺材",
+        "equipment": true,
+        "timing": "掷前",
+        "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
+        "effect": "coffin"
+      }
+    },
+    {
+      "id": "MON-III-03",
+      "name": "吞灯兽",
+      "ability": "揭晓。压势1。失败。承担者弃置2。",
+      "pressure": 1,
+      "matchOnly": false,
+      "cost": 0,
+      "loss": 0,
+      "drop": 2,
+      "loot": {
+        "name": "嚼不烂的灯芯",
+        "equipment": false,
+        "timing": "掷后",
+        "text": "将一颗当前检定骰改为20。",
+        "effect": "twenty"
+      }
+    }
+  ]
+};
