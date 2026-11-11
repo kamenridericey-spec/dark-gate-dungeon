@@ -14,10 +14,10 @@
 <header><h1>暗门地牢</h1><div class="row"><span id="perspective"></span><button id="help" aria-label="帮助">ⓘ</button></div></header>
 <main id="app"></main>
 <dialog id="guide"><h3>怎么操作</h3><p>城主埋牌后，冒险者从亮起的房间选路，再选承担者。检定达到 DC 即成功。优势掷两颗取高，劣势取低。城主的候选牌只在城主视角显示。</p><form method="dialog"><button>关闭</button></form></dialog>
-<script src="暗门地牢素材/遭遇与怪物.js?v=1d961c3083c3"></script>
-<script src="暗门地牢素材/收获.js?v=1d961c3083c3"></script>
-<script src="暗门地牢素材/地图.js?v=1d961c3083c3"></script>
-<script src="暗门地牢素材/决策.js?v=1d961c3083c3"></script>
+<script src="暗门地牢素材/遭遇与怪物.js?v=12da86418695"></script>
+<script src="暗门地牢素材/收获.js?v=12da86418695"></script>
+<script src="暗门地牢素材/地图.js?v=12da86418695"></script>
+<script src="暗门地牢素材/决策.js?v=12da86418695"></script>
 <script>
 const app=document.querySelector('#app'), perspective=document.querySelector('#perspective');
 document.querySelector('#help').onclick=()=>document.querySelector('#guide').showModal();
@@ -108,8 +108,8 @@ function start(){
  const ordinary=shufflePile(items.filter(card=>card.tier===1));
  const starting=ordinary.filter(card=>!card.equipment);
  heroes=roles.map(role=>({role,soul:role==='体魄'?4:3,max:role==='体魄'?4:3,equipment:[],hand:role==='心智'?[starting.shift()]:[],limit:role==='心智'?3:2}));
- resetMap();opening=[];rerollOwner=null;selectedCards.clear();rewardChoices=[];afterReward=null;payment=null;roomIncome=0;rewards=shufflePile([...Array(4).fill(fragmentCard),...ordinary.filter(card=>!heroes.some(hero=>hero.hand.includes(card)))]);
- at=0;selected=null;turn=0;round=1;echo=0;fragments=0;deck=[...cards];monsterDraw={1:[...monsters[1]],2:[],3:[]};monsterDiscard={1:[],2:[],3:[]};discards=[];cityHand=[];cityPicks.clear();maze=1;broadcast=[];discardHistory=[];discardOpen=false;kept=null;offer=[];log=[];note('每名心智随机获得 1 张普通物品。',0);beginRoom();
+ resetMap();opening=[];rerollOwner=null;selectedCards.clear();rewardChoices=[];afterReward=null;payment=null;roomIncome=0;pendingCard=null;choiceNext=null;recoveryTarget=null;rewards=shufflePile([...Array(4).fill(fragmentCard),...ordinary.filter(card=>!heroes.some(hero=>hero.hand.includes(card)))]);
+ rewardDiscards=[];recoveryPending=false;at=0;selected=null;turn=0;round=1;echo=0;fragments=0;deck=[...cards];monsterDraw={1:[...monsters[1]],2:[],3:[]};monsterDiscard={1:[],2:[],3:[]};discards=[];cityHand=[];cityPicks.clear();maze=1;broadcast=[];discardHistory=[];discardOpen=false;kept=null;offer=[];log=[];note('每名心智随机获得 1 张普通物品。',0);beginRoom();
 }
 function beginRoom(){
  expandMap();
@@ -236,7 +236,7 @@ function upgradeMaze(){
 }
 
 function reveal(){
- at=selected;visited.add(at);payment=null;tradeGoods=[];afterReward=null;roomIncome=0;roomFragment=false;dice=[];chooseDie=false;rerollOwner=null;rerollDie=null;selectedCards.clear();
+ lootDecision=null;recoveryTarget=null;at=selected;visited.add(at);payment=null;tradeGoods=[];afterReward=null;roomIncome=0;roomFragment=false;dice=[];chooseDie=false;rerollOwner=null;rerollDie=null;selectedCards.clear();
  if(opening.length){
   const index=Math.floor(coin()*opening.length);
   kept=opening.splice(index,1)[0];
@@ -259,7 +259,10 @@ function chooseEncounter(index){
  if(index===1)kept=challenger;
  discard(removed);challenger=null;note('公开弃置「'+removed.name+'」。');showEncounter();
 }
-let payment=null, tradeGoods=[], afterReward=null, roomIncome=0;
+let payment=null, tradeGoods=[], afterReward=null, roomIncome=0, rewardDiscards=[], recoveryPending=false;
+function discardReward(card){if(card&&!card.fragment)rewardDiscards.push(card)}
+function drawRewards(count){const result=[];for(let i=0;i<count;i++){if(!rewards.length&&rewardDiscards.length){rewards=shufflePile(rewardDiscards);rewardDiscards=[];note('普通收获弃牌洗回收获堆。')}if(rewards.length)result.push(rewards.shift())}return result}
+function chooseRecovery(supply){recoveryPending=false;if(supply){rewardChoices=drawRewards(1);rewardSuccess=false;phase='reward';if(!rewardChoices.length){closeRoom();return}if(side==='city'){takeReward(rewardChoices[0].fragment?-1:0);return}render();return}heroes.forEach(h=>h.soul=Math.min(h.max,h.soul+1));note('恢复房：全队各恢复 1 魂。');closeRoom()}
 function paymentOptions(){
  return alive().flatMap(owner=>[{owner},...['hand','equipment'].flatMap(zone=>heroes[owner][zone].map((card,index)=>({owner,zone,index,card})))]);
 }
@@ -273,7 +276,7 @@ function startTrade(index){
 function resolveTrade(final,success){
  if(final===20)note('最终取用 20，免除交易付款。');
  else if(payment.card){
-  const zone=heroes[payment.owner][payment.zone];zone.splice(zone.indexOf(payment.card),1);note(names[payment.owner]+'支付「'+payment.card.name+'」。');
+  const zone=heroes[payment.owner][payment.zone];zone.splice(zone.indexOf(payment.card),1);discardReward(payment.card);note(names[payment.owner]+'支付「'+payment.card.name+'」。');
  }else{
   const payer=heroes[payment.owner];payer.soul--;
   if(payment.owner===bearer&&protectedSoul&&payer.soul===0){payer.soul=1;protectedSoul=false;note('保魂效果触发，承担者保留 1 魂。')}
@@ -305,7 +308,7 @@ function showEncounter(){
   announce([text],()=>{phase='check';render()});return;
  }
  if(kept.kind==='交易'){
-  tradeGoods=rewards.splice(0,heroes[bearer].role==='魅力'?3:2);
+  tradeGoods=drawRewards(heroes[bearer].role==='魅力'?3:2);
   note('交易先展示货物：'+(tradeGoods.map(c=>c.name).join('、')||'无货')+'。');
   if(!tradeGoods.length||side==='city'){startTrade(tradeGoods.length&&alive().some(i=>heroes[i].soul>1)?paymentOptions().findIndex(p=>!p.card&&heroes[p.owner].soul>1):-1);return}
   phase='trade';render();return;
@@ -336,7 +339,7 @@ function roll(){
   note(names[owner]+'对'+names[bearer]+'使用「'+card.name+'」。');
  }
  for(const key of [...selectedCards].sort((a,b)=>Number(b.split('-')[1])-Number(a.split('-')[1]))){
-  const [owner,index,zone]=key.split('-');heroes[owner][zone].splice(index,1);
+  const [owner,index,zone]=key.split('-');discardReward(heroes[owner][zone].splice(index,1)[0]);
  }
  selectedCards.clear();
  dice=Array.from({length:mode?2:1},die);phase='rolled';note('掷骰 '+dice.join('、')+'。'+(mode>0?'优势取高。':mode<0?'劣势取低。':''));render()}
@@ -362,10 +365,16 @@ function settleRoom(success,roomReward){
  if(!success&&alive().length){
   if(kept.kind!=='战斗'&&kept.text.includes('失魂1'))loseSoul(1);
   const amount=Number(kept.text.match(/弃置(\d)/)?.[1]||0)+(monster?.drop||0);
-  for(let i=0;i<amount;i++){const hero=heroes[bearer], card=hero.hand.pop()??hero.equipment.pop();if(card)note(names[bearer]+'弃置「'+card.name+'」。')}
+  if(amount&&side==='party'&&(heroes[bearer].hand.length||heroes[bearer].equipment.length)){forcedRemaining=amount;choiceNext=()=>settleVictory(success,roomReward);phase='forcedDrop';render();return}
+  for(let i=0;i<amount;i++){const hero=heroes[bearer],card=hero.hand.pop()??hero.equipment.pop();if(card)discardReward(card)}
  }
- if(success&&monster?.cost){note('击败'+monster.name+'的胜利代价：承担者失魂 '+monster.cost+'。');loseSoul(monster.cost)}
- if(success&&monster&&alive().length&&heroes[bearer].soul>0){
+ settleVictory(success,roomReward);
+}
+function forceDrop(zone,index){const [card]=heroes[bearer][zone].splice(index,1);if(!card)return;discardReward(card);note(names[bearer]+'选择弃置「'+card.name+'」。');forcedRemaining--;if(forcedRemaining>0&&(heroes[bearer].hand.length||heroes[bearer].equipment.length)){render();return}const next=choiceNext;choiceNext=null;next()}
+function settleVictory(success,roomReward){
+ if(success&&monster?.cost&&side==='party'&&!lootDecision){phase='lootDecision';render();return}
+ if(success&&monster?.cost&&lootDecision!=='decline'){note('击败'+monster.name+'的胜利代价：承担者失魂 '+monster.cost+'。');loseSoul(monster.cost)}
+ if(success&&monster&&lootDecision!=='decline'&&alive().length&&heroes[bearer].soul>0){
   const loot=monster.loot;
   if(!heroes.some(hero=>[...hero.hand,...hero.equipment].includes(loot))){
    receiveCard(loot,bearer,()=>settleAfterLoot(success,roomReward));return;
@@ -375,12 +384,12 @@ function settleRoom(success,roomReward){
  settleAfterLoot(success,roomReward);
 }
 function settleAfterLoot(success,roomReward){
- if(roomReward&&fragments<4&&alive().length&&success&&kept.text.includes('恢复')){const target=kept.text.includes('一人恢复')?heroes.find(h=>h.soul<h.max):heroes[bearer];if(target){const amount=Number(kept.text.match(/恢复(\d)/)?.[1]||1);target.soul=Math.min(target.max,target.soul+amount);note('遭遇成功效果：恢复最多 '+amount+' 魂。')}}
- if(roomReward&&fragments<4&&alive().length&&success&&rooms[at].name==='恢复'){const healed=heroes.flatMap((h,i)=>h.soul<h.max?[names[i]]:[]);heroes.forEach(h=>h.soul=Math.min(h.max,h.soul+1));note(healed.length?healed.join('、')+'各恢复 1 魂。':'全队魂量已满。')}
+ if(roomReward&&fragments<4&&alive().length&&success&&kept.text.includes('恢复')){if(kept.text.includes('一人恢复')&&side==='party'&&recoveryTarget===null&&heroes.some(h=>h.soul<h.max)){phase='recoveryTarget';render();return}const target=kept.text.includes('一人恢复')?(recoveryTarget===null?heroes.find(h=>h.soul<h.max):heroes[recoveryTarget]):heroes[bearer];if(target){const amount=Number(kept.text.match(/恢复(\d)/)?.[1]||1);target.soul=Math.min(target.max,target.soul+amount);note('遭遇成功效果：恢复最多 '+amount+' 魂。')}}
+ recoveryPending=Boolean(roomReward&&fragments<4&&alive().length&&success&&rooms[at].name==='恢复');
  note('「'+kept.name+'」进入弃牌堆。');discard(kept);if(monster)monsterDiscard[kept.tier].push(monster);kept=null;
  const room=rooms[at].name;
  if(roomReward&&fragments<4&&!roomFragment&&alive().length&&(room==='宝藏'||room==='奇遇')){
-  rewardSuccess=success;rewardChoices=rewards.splice(0,room==='宝藏'&&success?2:1);
+  rewardSuccess=success;rewardChoices=drawRewards(room==='宝藏'&&success?2:1);
   note(rewardChoices.length?'翻出收获：'+rewardChoices.map(card=>card.name).join('、')+'。':'收获堆已空。');
   if(rewardChoices.length){
    phase='reward';
@@ -390,8 +399,11 @@ function settleAfterLoot(success,roomReward){
  }
  closeRoom();
 }
-let roomFragment=false, afterOverflow=null;
+let roomFragment=false, afterOverflow=null, lootDecision=null, choiceNext=null, forcedRemaining=0, recoveryTarget=null, pendingCard=null;
 function receiveCard(card,owner,next){
+ if(side==='party'&&card!==monster?.loot){pendingCard={card,owner,next};phase='recipient';render();return}receiveCardTo(card,owner,next);
+}
+function receiveCardTo(card,owner,next){
  const hero=heroes[owner], zone=card.equipment?'equipment':'hand', limit=card.equipment?2:hero.limit;
  hero[zone].push(card);note(names[owner]+'取得「'+card.name+'」。');
  if(hero[zone].length<=limit){next();return}
@@ -399,6 +411,7 @@ function receiveCard(card,owner,next){
  if(side==='city'){dropReward(hero[zone].length-1);return}render();
 }
 function closeRoom(){
+ if(recoveryPending&&alive().length&&fragments<4){if(side==='city'){chooseRecovery(!roomFragment&&heroes.every(h=>h.soul===h.max));return}phase='recovery';render();return}
  if(afterReward){const next=afterReward;afterReward=null;next();return}
  const ended=fragments>=4||!alive().length;
  if(!ended&&roomIncome){echo+=roomIncome;note('城主获得 '+roomIncome+' 回响。')}
@@ -415,7 +428,7 @@ function takeReward(index){
  rewards.push(...rewardChoices.filter((_,i)=>i!==index));rewardChoices=[];closeRoom();
 }
 function dropReward(index){
- const [card]=heroes[overflowOwner][overflowZone].splice(index,1);note(names[overflowOwner]+'弃置「'+card.name+'」以符合持有上限。');
+ const [card]=heroes[overflowOwner][overflowZone].splice(index,1);discardReward(card);note(names[overflowOwner]+'弃置「'+card.name+'」以符合持有上限。');
  const next=afterOverflow;afterOverflow=null;next();
 }
 function handCards(hero,index){
@@ -453,10 +466,10 @@ function render(){
  (cityAction==='opening'?'':'<div class="row">'+button('埋 1 张','actionSingle',cityAction==='single'?'primary':'',!cityHand.length)+button('埋 2 张 · 从埋牌区弃 1','actionFilter',cityAction==='filter'?'primary':'',cityHand.length<2)+button('花 1 回响 · 多埋 1 张','actionExtra',cityAction==='extra'?'primary':'',echo<1||cityHand.length<2)+button('弃 1 手牌 · 多埋 1 张','actionHandExtra',cityAction==='handExtra'?'primary':'',cityHand.length<3)+'</div>')+
  '<div class="hand">'+cityHand.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card)+(cityPicks.has(i)?'<small>已选 · 第 '+([...cityPicks].indexOf(i)+1)+' 张</small>':''),'pickCity'+i,'item-card '+(cityPicks.has(i)?'picked':'available'))).join('')+'</div>'+
  button('确认部署','commitCity','primary',cityPicks.size!==needed):'<small>手牌 '+cityHand.length+' 张</small>';
- const banner={cityOverflow:'城主 · 弃至六张手牌',mapChange:'城主 · 免费改图',trade:'冒险者 · 决定是否交易',prune:'城主 · 从埋牌区弃 1 张',revealOffer:'城主 · 决定是否另抽遭遇',compare:'城主 · 选择揭晓哪张',deploy:'城主 · 从手牌部署',upgrade:'城主 · 决定是否升级',broadcast:'城主 · 行动播报',route:'冒险者 · 选择路线与承担者',check:'冒险者 · 检定准备',rolled:'冒险者 · 确认骰面',reward:'冒险者 · 选择收获',overflow:'冒险者 · 整理手牌',clear:'房间结算完毕',end:'对局结束'}[phase];
+ const banner={recipient:'冒险者 · 分配收获',recoveryTarget:'冒险者 · 选择恢复对象',forcedDrop:'冒险者 · 选择弃置',lootDecision:'冒险者 · 决定领取代价',recovery:'冒险者 · 选择恢复或补给',cityOverflow:'城主 · 弃至六张手牌',mapChange:'城主 · 免费改图',trade:'冒险者 · 决定是否交易',prune:'城主 · 从埋牌区弃 1 张',revealOffer:'城主 · 决定是否另抽遭遇',compare:'城主 · 选择揭晓哪张',deploy:'城主 · 从手牌部署',upgrade:'城主 · 决定是否升级',broadcast:'城主 · 行动播报',route:'冒险者 · 选择路线与承担者',check:'冒险者 · 检定准备',rolled:'冒险者 · 确认骰面',reward:'冒险者 · 选择收获',overflow:'冒险者 · 整理手牌',clear:'房间结算完毕',end:'对局结束'}[phase];
  const compareButtons=(phase==='compare'?[kept,challenger]:phase==='revealOffer'?[kept]:[]).map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'revealCard'+i));
  const mapPanel=phase==='mapChange'?'<section class="paper check"><h3>免费移动一块未探索板块</h3><div class="row reward-options">'+movableTiles().map((tile,i)=>button(tile.name+' '+tile.id,'moveTile'+i,movingTile===tile?'primary':'',!moveOptions(tile).length)).join('')+'</div><div class="row reward-options">'+(movingTile?moveOptions(movingTile).map(({i,door},j)=>button(rooms[i].name+'房 '+(rooms[i].x)+','+(rooms[i].y)+' '+directions[door.dir][3],'moveTo'+j)).join(''):'')+button('跳过改图','skipMap')+'</div></section>':'';
- const cityPanel=phase==='cityOverflow'?'<section class="paper check"><h3>手牌上限 6 · 选择公开弃置</h3><div class="row">'+cityHand.map((c,i)=>button('<strong>'+c.name+'</strong>'+describe(c),'cityDrop'+i)).join('')+'</div></section>':phase==='trade'?'<section class="paper check"><h3>'+kept.name+' · 交易</h3><p>'+describe(kept)+'</p><div class="row">'+tradeGoods.map(c=>'<article class="paper"><strong>'+c.name+'</strong><p>'+c.text+'</p></article>').join('')+'</div><p>先看货，再承诺 1 魂或 1 件持有物。最终取用 20 免付，失败照付并随机取货。</p><div class="row reward-options">'+paymentOptions().map((p,i)=>button(names[p.owner]+' · '+(p.card?p.card.name:'1 魂'),'pay'+i)).join('')+button('拒绝交易','refuseTrade')+'</div></section>':phase==='prune'?'<section class="paper check"><h3>从整个埋牌区选一张公开弃置</h3><div class="row reward-options">'+opening.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'prune'+i)).join('')+'</div></section>':
+ const cityPanel=phase==='recipient'?'<section class="paper check"><h3>分配收获：'+pendingCard.card.name+'</h3>'+heroes.map((h,i)=>button('交给 '+names[i],'recipient'+i)).join('')+'</section>':phase==='recoveryTarget'?'<section class="paper check"><h3>选择恢复对象</h3>'+heroes.map((h,i)=>button(names[i]+' · '+h.soul+'/'+h.max,'healTarget'+i,'',h.soul>=h.max)).join('')+'</section>':phase==='forcedDrop'?'<section class="paper check"><h3>选择弃置 · 还需 '+forcedRemaining+' 张</h3>'+['hand','equipment'].map(z=>heroes[bearer][z].map((c,i)=>button(c.name,'forceDrop'+z+'-'+i)).join('')).join('')+'</section>':phase==='lootDecision'?'<section class="paper check"><h3>领取素材？</h3><p>'+monster.loot.name+' · 领取需承担者失去 '+monster.cost+' 魂，可能导致终局。</p>'+button('支付代价并领取','acceptLoot')+button('放弃素材，不支付代价','declineLoot')+'</section>':phase==='recovery'?'<section class="paper check"><h3>恢复房 · 选择收益</h3>'+button('全队各恢复 1 魂','recoverAll')+button('带走补给：翻一张，不能领取碎片','recoverSupply','',roomFragment)+'</section>':phase==='cityOverflow'?'<section class="paper check"><h3>手牌上限 6 · 选择公开弃置</h3><div class="row">'+cityHand.map((c,i)=>button('<strong>'+c.name+'</strong>'+describe(c),'cityDrop'+i)).join('')+'</div></section>':phase==='trade'?'<section class="paper check"><h3>'+kept.name+' · 交易</h3><p>'+describe(kept)+'</p><div class="row">'+tradeGoods.map(c=>'<article class="paper"><strong>'+c.name+'</strong><p>'+c.text+'</p></article>').join('')+'</div><p>先看货，再承诺 1 魂或 1 件持有物。最终取用 20 免付，失败照付并随机取货。</p><div class="row reward-options">'+paymentOptions().map((p,i)=>button(names[p.owner]+' · '+(p.card?p.card.name:'1 魂'),'pay'+i)).join('')+button('拒绝交易','refuseTrade')+'</div></section>':phase==='prune'?'<section class="paper check"><h3>从整个埋牌区选一张公开弃置</h3><div class="row reward-options">'+opening.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'prune'+i)).join('')+'</div></section>':
  ['revealOffer','compare'].includes(phase)?'<section class="paper check"><h3>'+ (phase==='compare'?'必须选择揭晓一张':'随机抽中的埋牌')+'</h3><div class="row reward-options">'+compareButtons.join('')+(phase==='revealOffer'?button('花 1 回响另抽一张','compareReveal','primary'):'')+'</div></section>':phase==='broadcast'?'<section class="paper check" aria-live="polite"><h3>城主行动</h3><p>'+broadcast[0]+'</p>'+button('查看下一步','advance','primary')+'</section>':phase==='upgrade'?'<section class="paper check"><h3>升级迷宫？</h3><p>花费 '+upgradeCosts[maze-1]+' 点回响，升至 '+roman[maze+1]+' 级。</p><div class="row action">'+button('确认升级','upgrade','primary')+button('本房不升级','skipUpgrade')+'</div></section>':'';
 
  app.innerHTML='<section class="stats"><div class="paper">碎片<strong>'+fragments+' / 4</strong><progress aria-label="碎片胜利进度" value="'+fragments+'" max="4"></progress></div><div class="paper">迷宫等级<strong>'+roman[maze]+'</strong><div>'+[1,2,3,4].map(n=>'<span class="slots" style="background:'+(n<=maze?'#c7dcc5':'transparent')+'">'+roman[n]+'</span>').join(' → ')+'</div></div><div class="paper">城主回响<strong class="crystal">◆ '+echo+'</strong><small>'+(maze<4?'下次升级需 '+upgradeCosts[maze-1]+' · 还差 '+Math.max(0,upgradeCosts[maze-1]-echo):'城主获胜')+'</small></div></section>'+
@@ -480,6 +493,11 @@ app.onclick=e=>{
  else if(action.startsWith('moveTile'))movingTile=movableTiles()[Number(action.slice(8))];
  else if(action.startsWith('moveTo')){relocate(Number(action.slice(6)));return}
  else if(action==='skipMap'){note('城主跳过免费改图。');prepareDeployment();return}
+ else if(action.startsWith('recipient')){const p=pendingCard;pendingCard=null;receiveCardTo(p.card,Number(action.slice(9)),p.next);return}
+ else if(action.startsWith('healTarget')){recoveryTarget=Number(action.slice(10));settleAfterLoot(true,true);return}
+ else if(action.startsWith('forceDrop')){const [z,i]=action.slice(9).split('-');forceDrop(z,Number(i));return}
+ else if(action==='acceptLoot'||action==='declineLoot'){lootDecision=action==='acceptLoot'?'accept':'decline';settleRoom(true,true);return}
+ else if(action==='recoverAll'||action==='recoverSupply'){chooseRecovery(action==='recoverSupply');return}
  else if(action.startsWith('cityDrop')){discardCityHand(Number(action.slice(8)));return}
  else if(action==='refuseTrade'){startTrade(-1);return}
  else if(action.startsWith('pay')){startTrade(Number(action.slice(3)));return}
@@ -504,7 +522,7 @@ app.onclick=e=>{
  else if(action.startsWith('use')){
   const key=action.slice(3), [owner,index,zone]=key.split('-');
   if(heroes[owner][zone][index].effect==='peek'){
-   const [item]=heroes[owner][zone].splice(index,1);
+   const [item]=discardReward(heroes[owner][zone].splice(index,1)[0]);
    note(names[owner]+'使用「'+item.name+'」，查看堆顶「'+rewards[0].name+'」。');
   }else if(heroes[owner][zone][index].timing==='掷前'){
    if(selectedCards.has(key))selectedCards.delete(key);else selectedCards.add(key);
@@ -516,7 +534,7 @@ app.onclick=e=>{
  else if(action.startsWith('die')){const i=Number(action.slice(3));rerollDie=rerollDie===i?null:i}
  else if(action==='confirmDie'){
   const i=rerollDie,old=dice[i],hand=heroes[rerollOwner][rerollZone];
-  const [item]=hand.splice(rerollCard,1);dice[i]=({twenty:()=>20,plus1:()=>Math.min(20,old+1),plus2:()=>Math.min(20,old+2),floor10:()=>Math.max(10,old)})[item.effect]?.()??die();chooseDie=false;rerollDie=null;
+  const [item]=hand.splice(rerollCard,1);discardReward(item);dice[i]=({twenty:()=>20,plus1:()=>Math.min(20,old+1),plus2:()=>Math.min(20,old+2),floor10:()=>Math.max(10,old)})[item.effect]?.()??die();chooseDie=false;rerollDie=null;
   note(names[rerollOwner]+'对'+names[bearer]+'使用「'+item.name+'」，骰 '+(i+1)+'：'+old+' → '+dice[i]+'。');
  }
  else if(action.startsWith('take')){takeReward(Number(action.slice(4)));return}
