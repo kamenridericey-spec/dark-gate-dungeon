@@ -14,10 +14,10 @@
 <header><h1>暗门地牢</h1><div class="row"><span id="perspective"></span><button id="help" aria-label="帮助">ⓘ</button></div></header>
 <main id="app"></main>
 <dialog id="guide"><h3>怎么操作</h3><p>城主埋牌后，冒险者从亮起的房间选路，再选承担者。检定达到 DC 即成功。优势掷两颗取高，劣势取低。城主的候选牌只在城主视角显示。</p><form method="dialog"><button>关闭</button></form></dialog>
-<script src="暗门地牢素材/遭遇与怪物.js?v=b3f5052a36c2"></script>
-<script src="暗门地牢素材/收获.js?v=b3f5052a36c2"></script>
-<script src="暗门地牢素材/地图.js?v=b3f5052a36c2"></script>
-<script src="暗门地牢素材/决策.js?v=b3f5052a36c2"></script>
+<script src="暗门地牢素材/遭遇与怪物.js?v=1d961c3083c3"></script>
+<script src="暗门地牢素材/收获.js?v=1d961c3083c3"></script>
+<script src="暗门地牢素材/地图.js?v=1d961c3083c3"></script>
+<script src="暗门地牢素材/决策.js?v=1d961c3083c3"></script>
 <script>
 const app=document.querySelector('#app'), perspective=document.querySelector('#perspective');
 document.querySelector('#help').onclick=()=>document.querySelector('#guide').showModal();
@@ -29,7 +29,7 @@ const items=dungeonRewards;
 let difficulty='standard', tileSupply=[], protectedSoul=false, overflowZone='hand', overflowOwner=0;
 function shufflePile(pile){for(let i=pile.length-1;i>0;i--){const j=Math.floor(coin()*(i+1));[pile[i],pile[j]]=[pile[j],pile[i]]}return pile}
 const encounterText=c=>c.kind==='战斗'?'战斗失败：承担者失去 1 魂，城主获得 2 回响。'+c.text.replace('战斗。',''):c.text;
-const roomText=room=>({宝藏:'成功翻两张收获选一；失败翻一张，只能收普通道具。',恢复:'成功时全队各恢复 1 魂。',奇遇:'翻一张收获；成功可收碎片，失败只能收普通道具。'})[room]??'没有额外房间奖励。';
+const roomText=room=>({宝藏:'成功翻两张收获选一；失败翻一张，只能收普通道具。',恢复:'成功时全队各恢复 1 魂。',奇遇:'翻一张收获；成功且翻到碎片才可领取，失败只能收普通道具。'})[room]??'没有额外房间奖励。';
 const describe=c=>'<small>'+roman[c.tier]+' 级 · '+c.kind+' · '+c.attribute+' DC '+c.dc+' · 偏好 '+c.prefer+'</small><p>'+encounterText(c)+'</p>';
 const rooms=[];
 const directions=[[1,0,'east','→'],[0,1,'south','↓'],[-1,0,'west','←'],[0,-1,'north','↑']];
@@ -124,13 +124,17 @@ function prepareDeployment(action='single'){
  const ranked=dungeonDecision.rankHand(cityHand,preferred,difficulty);
  const cost=upgradeCosts[maze-1];
  const extra=echo>0&&ranked.length>=2&&opening.length<2&&echo+1<cost;
- const actionChoice=extra?'extra':ranked.length>=2&&opening.some(card=>!preferred.includes(card.prefer))?'filter':'single';
- commitDeployment(actionChoice,ranked.slice(0,actionChoice==='single'?1:2));
+ const actionChoice=ranked.length>=3&&(cityHand.length>6||opening.length<2)?'handExtra':extra?'extra':ranked.length>=2&&opening.some(card=>!preferred.includes(card.prefer))?'filter':'single';
+ commitDeployment(actionChoice,ranked.slice(0,actionChoice==='single'?1:actionChoice==='handExtra'?3:2));
 }
 function commitDeployment(action,indices){
- const chosen=indices.map(i=>cityHand[i]);
+ const needed=action==='opening'?3:action==='single'?1:action==='handExtra'?3:2;
+ if(indices.length!==needed||new Set(indices).size!==needed||indices.some(i=>!cityHand[i])||(action==='extra'&&echo<1))return;
+ const paid=action==='handExtra'?cityHand[indices[2]]:null;
+ const chosen=indices.slice(0,action==='handExtra'?2:needed).map(i=>cityHand[i]);
  for(const index of [...indices].sort((a,b)=>b-a))cityHand.splice(index,1);
  opening.push(...chosen);
+ if(paid)discard(paid);
  if(action==='filter'){
   note('城主从手牌埋下 2 张，随后从整个埋牌区挑 1 张弃置。');
   if(side==='city'){phase='prune';render();return}
@@ -139,24 +143,34 @@ function commitDeployment(action,indices){
   pruneBuried(index<0?0:index);return;
  }
  if(action==='extra')echo--;
- const text=action==='extra'?'城主花费 1 点回响，额外埋下 1 张，本次共埋下 2 张。':'城主埋下 '+chosen.length+' 张。';
+ const text=paid?'城主公开弃置手牌「'+paid.name+'」，额外埋下 1 张，本次共埋下 2 张。':action==='extra'?'城主花费 1 点回响，额外埋下 1 张，本次共埋下 2 张。':'城主埋下 '+chosen.length+' 张。';
  deploymentDone(text);
 }
 function pruneBuried(index){
  const [removed]=opening.splice(index,1);discard(removed);
  deploymentDone('城主埋下 2 张，再从整个埋牌区公开弃置「'+removed.name+'」。');
 }
+function enforceCityLimit(){
+ if(cityHand.length<=6){phase='route';selected=null;bearer=alive()[0];render();return}
+ if(side==='city'){phase='cityOverflow';render();return}
+ const ranked=dungeonDecision.rankHand(cityHand,routes().map(id=>rooms[id].name),difficulty);
+ discardCityHand(ranked[ranked.length-1]);
+}
+function discardCityHand(index){
+ const [card]=cityHand.splice(index,1);if(!card)return;discard(card);
+ const text='城主手牌超过 6 张，公开弃置「'+card.name+'」。';note(text);announce([text],enforceCityLimit);
+}
 function deploymentDone(text){
  note(text+' 手牌剩 '+cityHand.length+' 张，埋牌区现有 '+opening.length+' 张。');
  announce([text,'城主手牌剩 '+cityHand.length+' 张。埋牌区现有 '+opening.length+' 张。'],()=>{
-  phase='route';selected=null;bearer=alive()[0];render();
+  enforceCityLimit();
  });
 }
 function startCityTurn(){
  round++;expandMap();
  if(!routes().length){result='地图已无可探索房间，本局原型停止。';note(result);phase='end';render();return}
- const card=draw();if(card)cityHand.push(card);
- const text=card?'城主摸牌 1 张。':'遭遇牌堆为空，城主无法摸牌。';
+ let count=0;for(let i=0;i<maze;i++){const card=draw();if(card){cityHand.push(card);count++}}
+ const text='城主按 '+roman[maze]+' 级摸牌 '+count+' 张（应摸 '+maze+' 张）。';
  note(text);
  announce([text],()=>{
   if(echo>=upgradeCosts[maze-1]){
@@ -215,8 +229,10 @@ function upgradeMaze(){
  for(const pile of [deck,rewards])for(let i=pile.length-1;i>0;i--){const j=Math.floor(coin()*(i+1));[pile[i],pile[j]]=[pile[j],pile[i]]}
  const added='遭遇库加入「'+events.map(card=>card.name).join('」「')+'」。收获库加入「'+newRewards.filter(card=>!card.fragment).map(card=>card.name).join('」「')+'」及 2 枚碎片。';
  const unlocked='解锁 '+roman[maze]+' 级怪物与素材：'+monsters[maze].map(m=>m.name+'／'+m.loot.name).join('、')+'。';
- note(added);note(unlocked);note('洗混遭遇牌库与收获牌库。');
- announce([text,added,unlocked,'洗混遭遇牌库与收获牌库。盖着的埋牌和城主手牌留在原处。'],offerMapChange);
+ const bonus=draw();if(bonus)cityHand.push(bonus);
+ const bonusText=bonus?'升级当回合额外补摸 1 张。':'牌堆无可用牌，升级补摸 0 张。';
+ note(bonusText);note(added);note(unlocked);note('洗混遭遇牌库与收获牌库。');
+ announce([text,added,unlocked,bonusText,'洗混遭遇牌库与收获牌库。盖着的埋牌和城主手牌留在原处。'],offerMapChange);
 }
 
 function reveal(){
@@ -249,8 +265,8 @@ function paymentOptions(){
 }
 function startTrade(index){
  const options=paymentOptions();
- if(index<0||!rewards.length){note('拒绝交易或无货：不付款、不检定、不结算房间奖励。');result='交易未进行';discard(kept);kept=null;closeRoom();return}
- payment=options[index];tradeGoods=rewards.splice(0,heroes[bearer].role==='魅力'?3:2);
+ if(index<0||!tradeGoods.length){rewards.push(...shufflePile(tradeGoods));tradeGoods=[];note('拒绝交易或无货：不付款、不检定、不结算房间奖励。');result='交易未进行';discard(kept);kept=null;closeRoom();return}
+ payment=options[index];if(!payment)return;
  note(names[payment.owner]+'承诺支付'+(payment.card?'「'+payment.card.name+'」':' 1 魂')+'；展示：'+tradeGoods.map(c=>c.name).join('、')+'。');
  phase='check';render();
 }
@@ -289,7 +305,9 @@ function showEncounter(){
   announce([text],()=>{phase='check';render()});return;
  }
  if(kept.kind==='交易'){
-  if(!rewards.length||side==='city'){startTrade(rewards.length&&alive().some(i=>heroes[i].soul>1)?paymentOptions().findIndex(p=>!p.card&&heroes[p.owner].soul>1):-1);return}
+  tradeGoods=rewards.splice(0,heroes[bearer].role==='魅力'?3:2);
+  note('交易先展示货物：'+(tradeGoods.map(c=>c.name).join('、')||'无货')+'。');
+  if(!tradeGoods.length||side==='city'){startTrade(tradeGoods.length&&alive().some(i=>heroes[i].soul>1)?paymentOptions().findIndex(p=>!p.card&&heroes[p.owner].soul>1):-1);return}
   phase='trade';render();return;
  }
  phase='check';render();
@@ -429,19 +447,19 @@ function render(){
  const rewardUI=phase==='reward'?'<section class="paper check"><h3>选择收获</h3><div class="row reward-options">'+rewardChoices.map((card,i)=>button('<strong>'+card.name+'</strong><br><small>'+(!rewardSuccess&&card.fragment?'本次失败，碎片归回堆底。':card.text)+'</small>','take'+i,'',card.fragment&&!rewardSuccess)).join('')+button('不领取','skipReward')+'</div></section>':phase==='overflow'?'<section class="paper check"><h3>持有已满，选择弃置一张</h3><div class="row reward-options">'+heroes[overflowOwner][overflowZone].map((card,i)=>button('<strong>'+card.name+'</strong><br><small>'+card.text+'</small>','drop'+i)).join('')+'</div></section>':'';
 
  const final=dice.length?(mode>0?Math.max(...dice):Math.min(...dice)):0;
- const needed=cityAction==='opening'?3:cityAction==='single'?1:2;
+ const needed=cityAction==='opening'?3:cityAction==='single'?1:cityAction==='handExtra'?3:2;
  const cityControl=phase==='deploy'?
- '<small>手牌 '+cityHand.length+' 张'+(cityAction==='filter'?' · 选两张手牌埋下':'')+'</small>'+
- (cityAction==='opening'?'':'<div class="row">'+button('埋 1 张','actionSingle',cityAction==='single'?'primary':'',!cityHand.length)+button('埋 2 张 · 从埋牌区弃 1','actionFilter',cityAction==='filter'?'primary':'',cityHand.length<2)+button('花 1 回响 · 多埋 1 张','actionExtra',cityAction==='extra'?'primary':'',echo<1||cityHand.length<2)+'</div>')+
+ '<small>手牌 '+cityHand.length+' / 6 张'+(cityAction==='handExtra'?' · 依次选：埋入牌、埋入牌、支付弃牌':'')+(cityAction==='filter'?' · 选两张手牌埋下':'')+'</small>'+
+ (cityAction==='opening'?'':'<div class="row">'+button('埋 1 张','actionSingle',cityAction==='single'?'primary':'',!cityHand.length)+button('埋 2 张 · 从埋牌区弃 1','actionFilter',cityAction==='filter'?'primary':'',cityHand.length<2)+button('花 1 回响 · 多埋 1 张','actionExtra',cityAction==='extra'?'primary':'',echo<1||cityHand.length<2)+button('弃 1 手牌 · 多埋 1 张','actionHandExtra',cityAction==='handExtra'?'primary':'',cityHand.length<3)+'</div>')+
  '<div class="hand">'+cityHand.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card)+(cityPicks.has(i)?'<small>已选 · 第 '+([...cityPicks].indexOf(i)+1)+' 张</small>':''),'pickCity'+i,'item-card '+(cityPicks.has(i)?'picked':'available'))).join('')+'</div>'+
  button('确认部署','commitCity','primary',cityPicks.size!==needed):'<small>手牌 '+cityHand.length+' 张</small>';
- const banner={mapChange:'城主 · 免费改图',trade:'冒险者 · 决定是否交易',prune:'城主 · 从埋牌区弃 1 张',revealOffer:'城主 · 决定是否另抽遭遇',compare:'城主 · 选择揭晓哪张',deploy:'城主 · 从手牌部署',upgrade:'城主 · 决定是否升级',broadcast:'城主 · 行动播报',route:'冒险者 · 选择路线与承担者',check:'冒险者 · 检定准备',rolled:'冒险者 · 确认骰面',reward:'冒险者 · 选择收获',overflow:'冒险者 · 整理手牌',clear:'房间结算完毕',end:'对局结束'}[phase];
+ const banner={cityOverflow:'城主 · 弃至六张手牌',mapChange:'城主 · 免费改图',trade:'冒险者 · 决定是否交易',prune:'城主 · 从埋牌区弃 1 张',revealOffer:'城主 · 决定是否另抽遭遇',compare:'城主 · 选择揭晓哪张',deploy:'城主 · 从手牌部署',upgrade:'城主 · 决定是否升级',broadcast:'城主 · 行动播报',route:'冒险者 · 选择路线与承担者',check:'冒险者 · 检定准备',rolled:'冒险者 · 确认骰面',reward:'冒险者 · 选择收获',overflow:'冒险者 · 整理手牌',clear:'房间结算完毕',end:'对局结束'}[phase];
  const compareButtons=(phase==='compare'?[kept,challenger]:phase==='revealOffer'?[kept]:[]).map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'revealCard'+i));
  const mapPanel=phase==='mapChange'?'<section class="paper check"><h3>免费移动一块未探索板块</h3><div class="row reward-options">'+movableTiles().map((tile,i)=>button(tile.name+' '+tile.id,'moveTile'+i,movingTile===tile?'primary':'',!moveOptions(tile).length)).join('')+'</div><div class="row reward-options">'+(movingTile?moveOptions(movingTile).map(({i,door},j)=>button(rooms[i].name+'房 '+(rooms[i].x)+','+(rooms[i].y)+' '+directions[door.dir][3],'moveTo'+j)).join(''):'')+button('跳过改图','skipMap')+'</div></section>':'';
- const cityPanel=phase==='trade'?'<section class="paper check"><h3>'+kept.name+' · 交易</h3><p>'+describe(kept)+'</p><p>承诺 1 魂或 1 件持有物。最终取用 20 免付，失败照付并随机取货。</p><div class="row reward-options">'+paymentOptions().map((p,i)=>button(names[p.owner]+' · '+(p.card?p.card.name:'1 魂'),'pay'+i)).join('')+button('拒绝交易','refuseTrade')+'</div></section>':phase==='prune'?'<section class="paper check"><h3>从整个埋牌区选一张公开弃置</h3><div class="row reward-options">'+opening.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'prune'+i)).join('')+'</div></section>':
+ const cityPanel=phase==='cityOverflow'?'<section class="paper check"><h3>手牌上限 6 · 选择公开弃置</h3><div class="row">'+cityHand.map((c,i)=>button('<strong>'+c.name+'</strong>'+describe(c),'cityDrop'+i)).join('')+'</div></section>':phase==='trade'?'<section class="paper check"><h3>'+kept.name+' · 交易</h3><p>'+describe(kept)+'</p><div class="row">'+tradeGoods.map(c=>'<article class="paper"><strong>'+c.name+'</strong><p>'+c.text+'</p></article>').join('')+'</div><p>先看货，再承诺 1 魂或 1 件持有物。最终取用 20 免付，失败照付并随机取货。</p><div class="row reward-options">'+paymentOptions().map((p,i)=>button(names[p.owner]+' · '+(p.card?p.card.name:'1 魂'),'pay'+i)).join('')+button('拒绝交易','refuseTrade')+'</div></section>':phase==='prune'?'<section class="paper check"><h3>从整个埋牌区选一张公开弃置</h3><div class="row reward-options">'+opening.map((card,i)=>button('<strong>'+card.name+'</strong>'+describe(card),'prune'+i)).join('')+'</div></section>':
  ['revealOffer','compare'].includes(phase)?'<section class="paper check"><h3>'+ (phase==='compare'?'必须选择揭晓一张':'随机抽中的埋牌')+'</h3><div class="row reward-options">'+compareButtons.join('')+(phase==='revealOffer'?button('花 1 回响另抽一张','compareReveal','primary'):'')+'</div></section>':phase==='broadcast'?'<section class="paper check" aria-live="polite"><h3>城主行动</h3><p>'+broadcast[0]+'</p>'+button('查看下一步','advance','primary')+'</section>':phase==='upgrade'?'<section class="paper check"><h3>升级迷宫？</h3><p>花费 '+upgradeCosts[maze-1]+' 点回响，升至 '+roman[maze+1]+' 级。</p><div class="row action">'+button('确认升级','upgrade','primary')+button('本房不升级','skipUpgrade')+'</div></section>':'';
 
- app.innerHTML='<section class="stats"><div class="paper">碎片<strong>'+fragments+' / 4</strong></div><div class="paper">迷宫等级<strong>'+roman[maze]+'</strong></div><div class="paper">城主回响<strong class="crystal">◆ '+echo+'</strong></div></section>'+
+ app.innerHTML='<section class="stats"><div class="paper">碎片<strong>'+fragments+' / 4</strong><progress aria-label="碎片胜利进度" value="'+fragments+'" max="4"></progress></div><div class="paper">迷宫等级<strong>'+roman[maze]+'</strong><div>'+[1,2,3,4].map(n=>'<span class="slots" style="background:'+(n<=maze?'#c7dcc5':'transparent')+'">'+roman[n]+'</span>').join(' → ')+'</div></div><div class="paper">城主回响<strong class="crystal">◆ '+echo+'</strong><small>'+(maze<4?'下次升级需 '+upgradeCosts[maze-1]+' · 还差 '+Math.max(0,upgradeCosts[maze-1]-echo):'城主获胜')+'</small></div></section>'+
  '<div class="table-layout"><div><section class="city"><div class="paper"><details id="discard-details" '+(discardOpen?'open':'')+'><summary>公开弃牌记录 · '+discardHistory.length+'</summary><small>当前堆内 '+discards.length+' 张</small><div class="discard-list">'+[...discardHistory].reverse().map(({card,room})=>'<article><strong>'+card.name+'</strong> · 第 '+room+' 房'+describe(card)+'</article>').join('')+'</div></details></div><div class="paper"><strong>城主席</strong><div class="row">'+(side==='city'?cityControl:'<small>城主手牌 '+cityHand.length+' 张 · 牌面隐藏。</small>')+'</div></div><div class="paper"><details><summary>埋牌区 · '+opening.length+'</summary>'+(opening.length?(side==='city'?opening.map(card=>'<div class="effect"><strong>'+card.name+'</strong>'+describe(card)+'</div>').join(''):'<span class="back">遭遇</span> '.repeat(opening.length)):'<small>空</small>')+'</details></div></section>'+
  '<div class="gate">'+banner+'</div><section class="paper board"><div class="row spread"><strong>第 '+round+' 房</strong><div class="row">'+button('旋转','rotate')+button('回正','reset')+'</div></div>'+
  '<div class="map-scroll"><div class="map" style="--turn:'+turn+'deg">'+rooms.map((r,i)=>'<button class="room '+(active.includes(i)?'open ':'')+(visited.has(i)?'visited ':'')+(i===selected?'selected':'')+'" style="grid-column:'+(r.x-minX+1)+';grid-row:'+(r.y-minY+1)+'" data-action="r'+i+'" '+(!route||!active.includes(i)?'disabled':'')+'>'+r.name+(r.shape?'<small class="external-label">'+r.shape+'</small>':'')+(i===at?'<span class="tokens">'+colors.map((c,j)=>'<span class="token" title="'+names[j]+'" style="--ink:'+c+'"></span>').join('')+'</span>':'')+roomDoors(r)+'</button>').join('')+'</div></div>'+
@@ -462,6 +480,7 @@ app.onclick=e=>{
  else if(action.startsWith('moveTile'))movingTile=movableTiles()[Number(action.slice(8))];
  else if(action.startsWith('moveTo')){relocate(Number(action.slice(6)));return}
  else if(action==='skipMap'){note('城主跳过免费改图。');prepareDeployment();return}
+ else if(action.startsWith('cityDrop')){discardCityHand(Number(action.slice(8)));return}
  else if(action==='refuseTrade'){startTrade(-1);return}
  else if(action.startsWith('pay')){startTrade(Number(action.slice(3)));return}
  else if(action.startsWith('prune')){pruneBuried(Number(action.slice(5)));return}
@@ -471,10 +490,10 @@ app.onclick=e=>{
  else if(action==='upgrade'){upgradeMaze();return}
  else if(action==='skipUpgrade'){note('城主本房不升级。');prepareDeployment();return}
  else if(action.startsWith('action')){
-  cityAction={actionSingle:'single',actionFilter:'filter',actionExtra:'extra'}[action];cityPicks.clear();
+  cityAction={actionSingle:'single',actionFilter:'filter',actionExtra:'extra',actionHandExtra:'handExtra'}[action];cityPicks.clear();
  }
  else if(action.startsWith('pickCity')){
-  const i=Number(action.slice(8)), limit=cityAction==='opening'?3:cityAction==='single'?1:2;
+  const i=Number(action.slice(8)), limit=cityAction==='opening'?3:cityAction==='single'?1:cityAction==='handExtra'?3:2;
   if(cityPicks.has(i))cityPicks.delete(i);else if(cityPicks.size<limit)cityPicks.add(i);
  }
  else if(action==='commitCity'){commitDeployment(cityAction,[...cityPicks]);return}
