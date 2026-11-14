@@ -1,0 +1,363 @@
+[
+  {
+    "id": "DEMO-REW-1",
+    "tier": 1,
+    "name": "洞察",
+    "equipment": false,
+    "timing": "行动前／开门前",
+    "effect": "insight",
+    "text": "翻明一张尚未使用的埋牌，保留原位。",
+    "windows": [
+      "行动前",
+      "开门前"
+    ],
+    "target": "未使用埋牌",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-2",
+    "tier": 1,
+    "name": "磨口铜哨",
+    "equipment": false,
+    "timing": "掷前",
+    "effect": "guard",
+    "text": "承担者护魂 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "guard",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-3",
+    "tier": 1,
+    "name": "备用骰",
+    "equipment": false,
+    "timing": "掷后",
+    "effect": "reroll",
+    "text": "选一颗骰重掷，采用新骰面。",
+    "windows": [
+      "检定后"
+    ],
+    "legacyEffect": "reroll",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-4",
+    "tier": 1,
+    "name": "旧皮护腕",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "guard",
+    "text": "承担者护魂 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "guard",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-5",
+    "tier": 1,
+    "name": "半瓶回魂水",
+    "equipment": false,
+    "timing": "掷前",
+    "effect": "heal1",
+    "text": "承担者恢复 1 魂。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "heal1",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-6",
+    "tier": 1,
+    "name": "疾跑",
+    "equipment": false,
+    "timing": "自由时机",
+    "effect": "sprint",
+    "text": "免费移动一名冒险者到合法已探索房间，不恢复行动或探索资格。",
+    "windows": [
+      "自由时机"
+    ],
+    "target": "冒险者与合法已探索房间",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-7",
+    "tier": 1,
+    "name": "逆天改命",
+    "equipment": false,
+    "timing": "遭遇揭晓后",
+    "effect": "replaceEncounter",
+    "text": "公开弃置本场遭遇，从公共遭遇堆另抽一张，必须使用新牌；不动其他埋牌。",
+    "windows": [
+      "遭遇揭晓后"
+    ],
+    "target": "本场遭遇",
+    "implementedInV2": true,
+    "excludeReplacedCard": true,
+    "consumeBuriedSlots": 1
+  },
+  {
+    "id": "DEMO-REW-8",
+    "tier": 1,
+    "name": "绷带夹板",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "heal1",
+    "text": "承担者恢复 1 魂。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "heal1",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-9",
+    "tier": 1,
+    "name": "歪嘴罗盘",
+    "equipment": false,
+    "timing": "准备",
+    "effect": "peek",
+    "text": "查看收获堆顶一张，原位放回。",
+    "windows": [
+      "行动前",
+      "开门前"
+    ],
+    "legacyEffect": "peek",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-10",
+    "tier": 1,
+    "name": "补钉短矛",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "battleBoost",
+    "text": "仅战斗。增势 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "battleBoost",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-11",
+    "tier": 1,
+    "name": "变形术",
+    "equipment": false,
+    "timing": "行动前／开门前",
+    "effect": "transform",
+    "text": "本轮将一名同房冒险者的检定专长改为另一种；不重算魂或容量。",
+    "windows": [
+      "行动前",
+      "开门前"
+    ],
+    "target": "同房冒险者",
+    "implementedInV2": true,
+    "changes": "checkSpecialtyOnly"
+  },
+  {
+    "id": "DEMO-REW-12",
+    "tier": 1,
+    "name": "软木飞镖",
+    "equipment": false,
+    "timing": "掷后",
+    "effect": "plus1",
+    "text": "选一颗骰加 1，上限 20。",
+    "windows": [
+      "检定后"
+    ],
+    "legacyEffect": "plus1",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-13",
+    "tier": 1,
+    "name": "褶纸斗篷",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "guard",
+    "text": "承担者护魂 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "guard",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-14",
+    "tier": 1,
+    "name": "替身纸人",
+    "equipment": false,
+    "timing": "开门前",
+    "effect": "substitute",
+    "text": "由一名合格同地点队员自愿替换承担者，不恢复探索资格。",
+    "windows": [
+      "开门前"
+    ],
+    "target": "合格同地点队员",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-15",
+    "tier": 1,
+    "name": "三寸镜",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "reverse",
+    "text": "反转当前净优势与净劣势。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "reverse",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-16",
+    "tier": 2,
+    "name": "移形换位",
+    "equipment": false,
+    "timing": "行动前",
+    "effect": "translocate",
+    "text": "直接传送到目标未探索奇遇房；下次主动操作强制探索该房，不刷新资格。",
+    "windows": [
+      "行动前"
+    ],
+    "target": "已展示未探索奇遇房与自愿目标",
+    "implementedInV2": true,
+    "forcedExploration": true,
+    "ordinaryMovementClears": false,
+    "clearWhenTargetExplored": true
+  },
+  {
+    "id": "DEMO-REW-17",
+    "tier": 2,
+    "name": "急救灯",
+    "equipment": false,
+    "timing": "掷前",
+    "effect": "heal2",
+    "text": "承担者恢复 2 魂。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "heal2",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-18",
+    "tier": 2,
+    "name": "两不相欠",
+    "equipment": false,
+    "timing": "开门前／检定前",
+    "effect": "forceNormal",
+    "text": "本次检定使用普通一颗D20，忽略优势与劣势；仍可合法重掷或改骰。",
+    "windows": [
+      "开门前",
+      "检定前"
+    ],
+    "target": "本次探索检定",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-19",
+    "tier": 2,
+    "name": "回弹肩甲",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "boostGuard",
+    "text": "增势 1，承担者护魂 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "boostGuard",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-20",
+    "tier": 2,
+    "name": "强权",
+    "equipment": false,
+    "timing": "行动前／开门前",
+    "effect": "changeTheme",
+    "text": "改为指定奇遇主题，影响后续尚未揭晓的探索，不追溯结算。",
+    "windows": [
+      "行动前",
+      "开门前"
+    ],
+    "target": "本轮公共奇遇主题",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-21",
+    "tier": 3,
+    "name": "第二颗心脏",
+    "equipment": false,
+    "timing": "掷前",
+    "effect": "healAll",
+    "text": "全队各恢复 1 魂。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "healAll",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-22",
+    "tier": 3,
+    "name": "借来的明天",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "coffin",
+    "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "coffin",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-23",
+    "tier": 3,
+    "name": "刻着二十的骨签",
+    "equipment": false,
+    "timing": "掷后",
+    "effect": "twenty",
+    "text": "将选中的骰面改为 20。",
+    "windows": [
+      "检定后"
+    ],
+    "legacyEffect": "twenty",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-24",
+    "tier": 3,
+    "name": "反相线圈",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "reverseGuard",
+    "text": "反转当前净势，承担者护魂 1。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "reverseGuard",
+    "implementedInV2": true
+  },
+  {
+    "id": "DEMO-REW-25",
+    "tier": 3,
+    "name": "环形屏障",
+    "equipment": true,
+    "timing": "掷前",
+    "effect": "guard2",
+    "text": "承担者护魂 2。",
+    "windows": [
+      "检定前"
+    ],
+    "legacyEffect": "guard2",
+    "implementedInV2": true
+  }
+]
