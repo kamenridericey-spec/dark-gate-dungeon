@@ -52,6 +52,7 @@ export function simulate(strategy,seed){const g=new Game(data,{seed});let steps=
     if(junk&&value(junk.c)<=4)g.acceptTrade({kind:'card',owner:junk.id,zone:junk.zone,uid:junk.c.uid});else if(g.heroes[e.bearer].soul>=2)g.acceptTrade({kind:'soul'});else g.acceptTrade(null);break;}
    case 'check':g.roll();break;
    case 'rolled':g.confirm();break;
+   case 'damage':g.applyDamage();break;
    case 'choice':throw Error('pending not handled');
    default:throw Error('未处理阶段'+g.phase);
   }

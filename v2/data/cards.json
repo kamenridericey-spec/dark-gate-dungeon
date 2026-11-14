@@ -12,7 +12,9 @@
       "开门前"
     ],
     "target": "未使用埋牌",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-2",
@@ -26,7 +28,9 @@
       "检定前"
     ],
     "legacyEffect": "guard",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-3",
@@ -40,13 +44,15 @@
       "检定后"
     ],
     "legacyEffect": "reroll",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-4",
     "tier": 1,
     "name": "旧皮护腕",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "guard",
     "text": "承担者护魂 1。",
@@ -54,7 +60,9 @@
       "检定前"
     ],
     "legacyEffect": "guard",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-5",
@@ -68,7 +76,9 @@
       "检定前"
     ],
     "legacyEffect": "heal1",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-6",
@@ -82,7 +92,9 @@
       "自由时机"
     ],
     "target": "冒险者与合法已探索房间",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-7",
@@ -98,13 +110,15 @@
     "target": "本场遭遇",
     "implementedInV2": true,
     "excludeReplacedCard": true,
-    "consumeBuriedSlots": 1
+    "consumeBuriedSlots": 1,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-8",
     "tier": 1,
     "name": "绷带夹板",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "heal1",
     "text": "承担者恢复 1 魂。",
@@ -112,7 +126,9 @@
       "检定前"
     ],
     "legacyEffect": "heal1",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-9",
@@ -127,13 +143,15 @@
       "开门前"
     ],
     "legacyEffect": "peek",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-10",
     "tier": 1,
     "name": "补钉短矛",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "battleBoost",
     "text": "仅战斗。增势 1。",
@@ -141,7 +159,9 @@
       "检定前"
     ],
     "legacyEffect": "battleBoost",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-11",
@@ -157,7 +177,9 @@
     ],
     "target": "同房冒险者",
     "implementedInV2": true,
-    "changes": "checkSpecialtyOnly"
+    "changes": "checkSpecialtyOnly",
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-12",
@@ -171,13 +193,15 @@
       "检定后"
     ],
     "legacyEffect": "plus1",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-13",
     "tier": 1,
     "name": "褶纸斗篷",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "guard",
     "text": "承担者护魂 1。",
@@ -185,27 +209,34 @@
       "检定前"
     ],
     "legacyEffect": "guard",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-14",
     "tier": 1,
     "name": "替身纸人",
     "equipment": false,
-    "timing": "开门前",
+    "timing": "受伤前／检定前",
     "effect": "substitute",
-    "text": "由一名合格同地点队员自愿替换承担者，不恢复探索资格。",
+    "text": "选择另一位存活同行替换承担者；可在遭遇失魂确认前使用，不能回滚已扣的魂，也不能转移交易支付。",
     "windows": [
-      "开门前"
+      "开门前",
+      "检定前",
+      "检定后",
+      "受伤前"
     ],
     "target": "合格同地点队员",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-15",
     "tier": 1,
     "name": "三寸镜",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "reverse",
     "text": "反转当前净优势与净劣势。",
@@ -213,7 +244,9 @@
       "检定前"
     ],
     "legacyEffect": "reverse",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-16",
@@ -230,7 +263,9 @@
     "implementedInV2": true,
     "forcedExploration": true,
     "ordinaryMovementClears": false,
-    "clearWhenTargetExplored": true
+    "clearWhenTargetExplored": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-17",
@@ -244,7 +279,9 @@
       "检定前"
     ],
     "legacyEffect": "heal2",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-18",
@@ -259,13 +296,15 @@
       "检定前"
     ],
     "target": "本次探索检定",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-19",
     "tier": 2,
     "name": "回弹肩甲",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "boostGuard",
     "text": "增势 1，承担者护魂 1。",
@@ -273,7 +312,9 @@
       "检定前"
     ],
     "legacyEffect": "boostGuard",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-20",
@@ -288,7 +329,9 @@
       "开门前"
     ],
     "target": "本轮公共奇遇主题",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-21",
@@ -302,13 +345,15 @@
       "检定前"
     ],
     "legacyEffect": "healAll",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-22",
     "tier": 3,
     "name": "借来的明天",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "coffin",
     "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
@@ -316,7 +361,9 @@
       "检定前"
     ],
     "legacyEffect": "coffin",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-23",
@@ -330,13 +377,15 @@
       "检定后"
     ],
     "legacyEffect": "twenty",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "道具",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-24",
     "tier": 3,
     "name": "反相线圈",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "reverseGuard",
     "text": "反转当前净势，承担者护魂 1。",
@@ -344,13 +393,15 @@
       "检定前"
     ],
     "legacyEffect": "reverseGuard",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   },
   {
     "id": "DEMO-REW-25",
     "tier": 3,
     "name": "环形屏障",
-    "equipment": true,
+    "equipment": false,
     "timing": "掷前",
     "effect": "guard2",
     "text": "承担者护魂 2。",
@@ -358,6 +409,8 @@
       "检定前"
     ],
     "legacyEffect": "guard2",
-    "implementedInV2": true
+    "implementedInV2": true,
+    "originalKind": "装备",
+    "inventoryType": "unified"
   }
 ]

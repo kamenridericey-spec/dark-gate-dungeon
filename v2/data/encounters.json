@@ -377,7 +377,9 @@
           "equipment": false,
           "timing": "掷后",
           "text": "重投1，必须接受新值。",
-          "effect": "reroll"
+          "effect": "reroll",
+          "originalKind": "道具",
+          "inventoryType": "unified"
         }
       },
       {
@@ -391,10 +393,12 @@
         "drop": 0,
         "loot": {
           "name": "反穿的鳞片",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "一人护魂1。",
-          "effect": "guard"
+          "effect": "guard",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       },
       {
@@ -409,9 +413,15 @@
         "loot": {
           "name": "唱反调的眼球",
           "equipment": false,
-          "timing": "准备",
-          "text": "展示收获堆顶1张，原位放回。",
-          "effect": "peek"
+          "timing": "开门前",
+          "text": "翻明一张未使用的遭遇，保持明牌与原位，不立即结算。",
+          "effect": "insight",
+          "windows": [
+            "行动前",
+            "开门前"
+          ],
+          "originalKind": "道具",
+          "inventoryType": "unified"
         }
       },
       {
@@ -425,10 +435,12 @@
         "drop": 0,
         "loot": {
           "name": "借来的第三只手",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "承担者护魂 2。",
-          "effect": "guard2"
+          "effect": "guard2",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       }
     ],
@@ -444,10 +456,12 @@
         "drop": 0,
         "loot": {
           "name": "弹簧触须",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "增势1，一人护魂1。",
-          "effect": "boostGuard"
+          "effect": "boostGuard",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       },
       {
@@ -464,7 +478,9 @@
           "equipment": false,
           "timing": "掷前",
           "text": "一人恢复2。",
-          "effect": "heal2"
+          "effect": "heal2",
+          "originalKind": "道具",
+          "inventoryType": "unified"
         }
       },
       {
@@ -478,10 +494,12 @@
         "drop": 0,
         "loot": {
           "name": "不合脸的面具",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "逆转。一人护魂1。",
-          "effect": "reverseGuard"
+          "effect": "reverseGuard",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       }
     ],
@@ -497,10 +515,12 @@
         "drop": 0,
         "loot": {
           "name": "软塌塌的王冠",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "本次玩家优势来源不足以超过城主时，增加至比城主多1。",
-          "effect": "crown"
+          "effect": "crown",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       },
       {
@@ -514,10 +534,12 @@
         "drop": 0,
         "loot": {
           "name": "随身小棺材",
-          "equipment": true,
+          "equipment": false,
           "timing": "掷前",
           "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
-          "effect": "coffin"
+          "effect": "coffin",
+          "originalKind": "装备",
+          "inventoryType": "unified"
         }
       },
       {
@@ -534,7 +556,9 @@
           "equipment": false,
           "timing": "掷后",
           "text": "将一颗当前检定骰改为20。",
-          "effect": "twenty"
+          "effect": "twenty",
+          "originalKind": "道具",
+          "inventoryType": "unified"
         }
       }
     ]
