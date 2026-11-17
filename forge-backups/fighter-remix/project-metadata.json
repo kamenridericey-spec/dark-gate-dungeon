@@ -1,0 +1,971 @@
+{
+  "fragment": {
+    "id": "frag_f88d18ca-218d-4194-abde-ee631568c2af",
+    "orgId": "org_f873e288-03fd-4937-ae00-4c7c1dd5ceaa",
+    "name": "fighter remix",
+    "description": "Pixel-art fighter jet built by sprite stacking, over stacked islands. Space cycles overhead, chase and cockpit views; click rolls, hold fires the thrusters; fly from the wavetops to high altitude.",
+    "tags": [
+      "pixel-art",
+      "sprite-stacking",
+      "canvas",
+      "animation",
+      "interactive",
+      "game"
+    ],
+    "collectionId": null,
+    "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+    "defaultVariantId": "var_9182f700-7bdc-45fa-bc33-917a5fe3f4f3",
+    "revision": 5,
+    "createdAt": 1794878482692,
+    "updatedAt": 1794880407510,
+    "variantCount": 1,
+    "assetCount": 32,
+    "byteSize": 3183871,
+    "runtime": 1,
+    "visibility": "public",
+    "slug": "fighter-ic-remix",
+    "publishedRevision": 4,
+    "publishedAt": 1794880375102,
+    "archivedAt": null,
+    "linkAccess": "remix",
+    "passwordProtected": false,
+    "remixedFrom": {
+      "fragmentId": "frag_1eb8944c-57b1-42ca-a909-5c2d7e517c24",
+      "revision": 44,
+      "orgId": "org_d067ffde-19ba-4e53-89a5-b2272cdc226f",
+      "collectionId": null,
+      "at": 1794878482692
+    },
+    "variants": [
+      {
+        "id": "var_9182f700-7bdc-45fa-bc33-917a5fe3f4f3",
+        "name": "fighterv2",
+        "entrySlug": "fighter-jet-eject",
+        "sourceSha256": "9e51d28f31907014ef953f3fedf244d8581fafa0ecca263350d0d657578b774f",
+        "sourceByteSize": 48795,
+        "story": {
+          "sections": [
+            {
+              "title": "Helpers",
+              "controls": [
+                {
+                  "prop": "showHint",
+                  "control": "switch",
+                  "label": "Tutorial and Intel buttons (top right)",
+                  "default": true
+                },
+                {
+                  "prop": "touchControls",
+                  "control": "segmented",
+                  "label": "Touch buttons (auto = phones and tablets)",
+                  "default": "auto",
+                  "options": [
+                    "auto",
+                    "on",
+                    "off"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Sound",
+              "controls": [
+                {
+                  "prop": "sound",
+                  "control": "switch",
+                  "label": "Sound (starts with the first click or key)",
+                  "default": true
+                },
+                {
+                  "prop": "volume",
+                  "control": "slider",
+                  "label": "Volume",
+                  "default": 0.6,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05,
+                  "visibleWhen": {
+                    "prop": "sound",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "radio",
+                  "control": "switch",
+                  "label": "Radio chatter during a rescue",
+                  "default": true,
+                  "visibleWhen": {
+                    "prop": "sound",
+                    "equals": true
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Flight",
+              "controls": [
+                {
+                  "prop": "crash",
+                  "control": "switch",
+                  "label": "Crashes (dive into the ground to eject)",
+                  "default": true
+                },
+                {
+                  "prop": "speed",
+                  "control": "slider",
+                  "label": "Speed",
+                  "default": 92,
+                  "min": 20,
+                  "max": 220,
+                  "step": 1
+                },
+                {
+                  "prop": "boost",
+                  "control": "slider",
+                  "label": "Thruster boost (× speed while held)",
+                  "default": 1.8,
+                  "min": 1,
+                  "max": 3,
+                  "step": 0.05
+                },
+                {
+                  "prop": "agility",
+                  "control": "slider",
+                  "label": "Turn rate",
+                  "default": 1.25,
+                  "min": 0.3,
+                  "max": 3,
+                  "step": 0.05
+                },
+                {
+                  "prop": "bank",
+                  "control": "slider",
+                  "label": "Bank angle",
+                  "default": 52,
+                  "min": 0,
+                  "max": 80,
+                  "step": 1
+                },
+                {
+                  "prop": "altitude",
+                  "control": "slider",
+                  "label": "Cruising altitude",
+                  "default": 64,
+                  "min": 10,
+                  "max": 300,
+                  "step": 1
+                },
+                {
+                  "prop": "ceiling",
+                  "control": "slider",
+                  "label": "Ceiling (highest it climbs)",
+                  "default": 300,
+                  "min": 60,
+                  "max": 3000,
+                  "step": 20
+                },
+                {
+                  "prop": "clearance",
+                  "control": "slider",
+                  "label": "Ground clearance (lowest it skims)",
+                  "default": 7,
+                  "min": 3,
+                  "max": 40,
+                  "step": 1
+                },
+                {
+                  "prop": "wingmen",
+                  "control": "slider",
+                  "label": "Wingmen",
+                  "default": 0,
+                  "min": 0,
+                  "max": 2,
+                  "step": 1
+                },
+                {
+                  "prop": "followPointer",
+                  "control": "switch",
+                  "label": "Steer with pointer",
+                  "default": true
+                },
+                {
+                  "prop": "invertY",
+                  "control": "switch",
+                  "label": "Flight-stick up/down (down climbs, up dives)",
+                  "default": true
+                },
+                {
+                  "prop": "stunts",
+                  "control": "switch",
+                  "label": "Rolls on autopilot",
+                  "default": true
+                }
+              ]
+            },
+            {
+              "title": "Combat",
+              "controls": [
+                {
+                  "prop": "weapons",
+                  "control": "switch",
+                  "label": "Weapons (right-click cannon, M missiles)",
+                  "default": true
+                },
+                {
+                  "prop": "ammo",
+                  "control": "slider",
+                  "label": "Cannon rounds before a reload (0 = no limit)",
+                  "default": 300,
+                  "min": 0,
+                  "max": 1000,
+                  "step": 10,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "missiles",
+                  "control": "slider",
+                  "label": "Missiles before a reload (0 = no limit; counters are free)",
+                  "default": 6,
+                  "min": 0,
+                  "max": 12,
+                  "step": 1,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "reload",
+                  "control": "slider",
+                  "label": "Reload time, cannon and missiles (seconds)",
+                  "default": 5,
+                  "min": 0,
+                  "max": 15,
+                  "step": 0.5,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "enemies",
+                  "control": "slider",
+                  "label": "Enemy jets (keep one ahead to lock on)",
+                  "default": 3,
+                  "min": 0,
+                  "max": 5,
+                  "step": 1,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "foeFire",
+                  "control": "switch",
+                  "label": "Enemies attack (guns and missiles; roll to dodge)",
+                  "default": true,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                },
+                {
+                  "prop": "slowMo",
+                  "control": "slider",
+                  "label": "Dodge slow motion (seconds, 0 = off)",
+                  "default": 1.3,
+                  "min": 0,
+                  "max": 2.5,
+                  "step": 0.05,
+                  "visibleWhen": {
+                    "prop": "weapons",
+                    "equals": true
+                  }
+                }
+              ]
+            },
+            {
+              "title": "Sprite stack",
+              "controls": [
+                {
+                  "prop": "jetScale",
+                  "control": "slider",
+                  "label": "Jet size",
+                  "default": 1,
+                  "min": 0.6,
+                  "max": 1.6,
+                  "step": 0.05
+                },
+                {
+                  "prop": "spread",
+                  "control": "slider",
+                  "label": "Slice spacing",
+                  "default": 1,
+                  "min": 1,
+                  "max": 7,
+                  "step": 0.1
+                },
+                {
+                  "prop": "pixelSize",
+                  "control": "slider",
+                  "label": "Pixel size (0 = auto)",
+                  "default": 0,
+                  "min": 0,
+                  "max": 12,
+                  "step": 1
+                },
+                {
+                  "prop": "intro",
+                  "control": "switch",
+                  "label": "Stack-up intro",
+                  "default": true
+                }
+              ]
+            },
+            {
+              "title": "Camera",
+              "controls": [
+                {
+                  "prop": "view",
+                  "control": "segmented",
+                  "label": "View (Space switches)",
+                  "default": "top",
+                  "options": [
+                    "top",
+                    "chase",
+                    "cockpit"
+                  ]
+                },
+                {
+                  "prop": "transition",
+                  "control": "slider",
+                  "label": "View change (seconds)",
+                  "default": 1.4,
+                  "min": 0.4,
+                  "max": 4,
+                  "step": 0.1
+                },
+                {
+                  "prop": "cameraFollow",
+                  "control": "slider",
+                  "label": "Overhead: turn with the jet",
+                  "default": 0.6,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "chaseDistance",
+                  "control": "slider",
+                  "label": "Chase: distance (jet lengths)",
+                  "default": 2.6,
+                  "min": 1.4,
+                  "max": 6,
+                  "step": 0.1
+                },
+                {
+                  "prop": "chaseAngle",
+                  "control": "slider",
+                  "label": "Chase: height (degrees)",
+                  "default": 12,
+                  "min": 4,
+                  "max": 35,
+                  "step": 1
+                },
+                {
+                  "prop": "chaseSize",
+                  "control": "slider",
+                  "label": "Chase: jet width on screen",
+                  "default": 0.19,
+                  "min": 0.08,
+                  "max": 0.4,
+                  "step": 0.01
+                },
+                {
+                  "prop": "ejectZoom",
+                  "control": "slider",
+                  "label": "Ejection: close-up on the pilot (0 = none)",
+                  "default": 0.8,
+                  "min": 0,
+                  "max": 1.5,
+                  "step": 0.05,
+                  "visibleWhen": {
+                    "prop": "crash",
+                    "equals": true
+                  }
+                }
+              ]
+            },
+            {
+              "title": "World",
+              "controls": [
+                {
+                  "prop": "timeOfDay",
+                  "control": "segmented",
+                  "label": "Time of day",
+                  "default": "day",
+                  "options": [
+                    "day",
+                    "sunset",
+                    "night"
+                  ]
+                },
+                {
+                  "prop": "land",
+                  "control": "slider",
+                  "label": "Islands",
+                  "default": 0.33,
+                  "min": 0.05,
+                  "max": 0.75,
+                  "step": 0.01
+                },
+                {
+                  "prop": "clouds",
+                  "control": "slider",
+                  "label": "Clouds",
+                  "default": 0.45,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "seed",
+                  "control": "number",
+                  "label": "World seed",
+                  "default": 7
+                },
+                {
+                  "prop": "shadow",
+                  "control": "switch",
+                  "label": "Jet shadow",
+                  "default": true
+                }
+              ]
+            },
+            {
+              "title": "Look",
+              "controls": [
+                {
+                  "prop": "bloom",
+                  "control": "slider",
+                  "label": "Glow (fire, sun, engines, glints)",
+                  "default": 0.5,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "vivid",
+                  "control": "slider",
+                  "label": "Colour depth and contrast",
+                  "default": 0.25,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "vignette",
+                  "control": "slider",
+                  "label": "Darkened corners",
+                  "default": 0.3,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "grain",
+                  "control": "slider",
+                  "label": "Film grain",
+                  "default": 0,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                }
+              ]
+            },
+            {
+              "title": "Effects",
+              "controls": [
+                {
+                  "prop": "flameStyle",
+                  "control": "segmented",
+                  "label": "Thruster flames",
+                  "default": "pixel",
+                  "options": [
+                    "pixel",
+                    "realistic"
+                  ]
+                },
+                {
+                  "prop": "afterburner",
+                  "control": "slider",
+                  "label": "Afterburner",
+                  "default": 0.8,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "trails",
+                  "control": "switch",
+                  "label": "Wingtip trails",
+                  "default": true
+                },
+                {
+                  "prop": "wake",
+                  "control": "slider",
+                  "label": "Wake and spray low over the sea",
+                  "default": 1,
+                  "min": 0,
+                  "max": 2,
+                  "step": 0.1
+                },
+                {
+                  "prop": "cloudCut",
+                  "control": "switch",
+                  "label": "Jets cut through clouds",
+                  "default": true
+                },
+                {
+                  "prop": "flash",
+                  "control": "slider",
+                  "label": "Explosion: flash and sparks",
+                  "default": 0.6,
+                  "min": 0,
+                  "max": 1,
+                  "step": 0.05
+                },
+                {
+                  "prop": "shake",
+                  "control": "slider",
+                  "label": "Explosion: camera shake",
+                  "default": 1,
+                  "min": 0,
+                  "max": 2,
+                  "step": 0.1
+                }
+              ]
+            },
+            {
+              "title": "Jet colours",
+              "controls": [
+                {
+                  "prop": "bodyColor",
+                  "control": "color",
+                  "label": "Body",
+                  "default": "#545969"
+                },
+                {
+                  "prop": "accentColor",
+                  "control": "color",
+                  "label": "Accent",
+                  "default": "#f0580e"
+                },
+                {
+                  "prop": "canopyColor",
+                  "control": "color",
+                  "label": "Canopy",
+                  "default": "#1e8ca0"
+                }
+              ]
+            }
+          ],
+          "values": {
+            "showHint": true,
+            "touchControls": "auto",
+            "sound": true,
+            "volume": 0.6,
+            "radio": true,
+            "crash": true,
+            "weapons": true,
+            "ammo": 300,
+            "missiles": 6,
+            "reload": 5,
+            "enemies": 3,
+            "foeFire": true,
+            "slowMo": 1.3,
+            "cloudCut": true,
+            "ejectZoom": 1,
+            "speed": 92,
+            "boost": 1.8,
+            "agility": 1.25,
+            "bank": 52,
+            "altitude": 110,
+            "ceiling": 1500,
+            "clearance": 7,
+            "wingmen": 0,
+            "followPointer": true,
+            "invertY": true,
+            "stunts": true,
+            "jetScale": 0.6,
+            "spread": 1,
+            "pixelSize": 3,
+            "intro": false,
+            "view": "chase",
+            "transition": 1.4,
+            "cameraFollow": 0.6,
+            "chaseDistance": 2.6,
+            "chaseAngle": 12,
+            "chaseSize": 0.19,
+            "timeOfDay": "day",
+            "land": 0.33,
+            "clouds": 0.45,
+            "seed": 7,
+            "shadow": true,
+            "bloom": 0.8,
+            "vivid": 0,
+            "vignette": 0.3,
+            "grain": 0.25,
+            "flameStyle": "pixel",
+            "afterburner": 1,
+            "trails": true,
+            "wake": 1,
+            "flash": 0.6,
+            "shake": 1,
+            "bodyColor": "#545969",
+            "accentColor": "#f0580e",
+            "canopyColor": "#1e8ca0"
+          },
+          "canvas": {
+            "layout": "fill"
+          }
+        },
+        "orderIndex": 0,
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      }
+    ],
+    "assets": [
+      {
+        "id": "fast_82ce2399-4130-4a34-95ea-dd1694af1a48",
+        "logicalPath": "assets/jet-four-views.png",
+        "mime": "image/png",
+        "byteSize": 689268,
+        "sha256": "038f5cb2e905170a6b781b31040b647f2f47e8ea2bf2c62a7cb960e11e628766",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_b20d5368-193e-4253-b454-06c2425cc9a6",
+        "logicalPath": "assets/pilot-four-views.png",
+        "mime": "image/png",
+        "byteSize": 862083,
+        "sha256": "55dad4a02aeb4b433a9f876fa0b5716842fee181bb9bcc02bde17ddaf238cd5c",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_161137c6-bfda-4344-9071-62d41cfb5882",
+        "logicalPath": "assets/sounds/afterburner.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 84889,
+        "sha256": "235076efb38f366ee38dc6ff36b78d9f98f87dfd453ac3b19df2465e0d94052b",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_633458d1-5986-4934-8c27-46b9d9cd9a01",
+        "logicalPath": "assets/sounds/alarm.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 32592,
+        "sha256": "062bb317dbb4c1466d9ed425054671438577e311310edb064712f25d63c9cdbf",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_b221b017-c54c-47fc-953e-00e70bc99852",
+        "logicalPath": "assets/sounds/blast.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 42832,
+        "sha256": "b893cc2323b11ba918881ee80db653958fccf2c5b1c1045f5d0ef66ccf31994d",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_2b09f1a2-4e78-4238-af47-f88a9d512e6a",
+        "logicalPath": "assets/sounds/canopy.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 28934,
+        "sha256": "ea7fb48360f4069bd8c08ced717d068c530143ddde7018f08efcbce53fdcfaf6",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_9ab004b1-081c-408e-8568-51844fed1c2a",
+        "logicalPath": "assets/sounds/chute.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 27472,
+        "sha256": "f3e0fbe7347bb4694b20e28d9622ca06590e283bf8ded76c6e1be1d120519148",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_6e764bed-6c7c-4263-b2e9-7cfe598eea1b",
+        "logicalPath": "assets/sounds/cloud.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 17232,
+        "sha256": "0b7755d4fd9ef52378da4ebda462ca9989a6ca5d079e09fbbd1927e840d35a12",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_ec6b6b3f-33ed-4508-829e-d014b8eacb45",
+        "logicalPath": "assets/sounds/eject.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 35517,
+        "sha256": "f84d442c5c0411aa3101a39357ef9b427271a1d01fda1e41604996d730f28f18",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_b9acedd4-0d89-46f2-92c0-4c51baf80d90",
+        "logicalPath": "assets/sounds/empty.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 17179,
+        "sha256": "9c5a07e6e18c4ac7662588a8fe26004457f7e0644e04ef8cdb70b937ab281182",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_25d6d1ec-6650-4d1e-96c0-fd78062f60b2",
+        "logicalPath": "assets/sounds/engine.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 84889,
+        "sha256": "c2ca7bbefc6740cc1a567869747fd1bf9b896d8e4119279f3d86052b3d8638e4",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_1568aa70-7d22-4a05-98d1-334228635a55",
+        "logicalPath": "assets/sounds/explosion.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 63677,
+        "sha256": "ef4700e8e87bcd8fbdb36e6888469619ad2ad47b3518f5c4eef5b4a6c90ea85a",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_82f36b3e-f675-4791-86b1-71fd752ae322",
+        "logicalPath": "assets/sounds/flyby.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 46489,
+        "sha256": "46db8a6288bdad0da903a48c243ae519833cfd7a9ea681a233d963bc9808c0ee",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_7ff473db-6149-4062-b77b-b66eac2a1e51",
+        "logicalPath": "assets/sounds/gun.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 36405,
+        "sha256": "e582c5252bdce028e4561e0d827b9dc48bb3fd13a53e324da927b453bb854ff2",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_7131f6a8-4445-4955-9e61-a796e3086b0e",
+        "logicalPath": "assets/sounds/guntail.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 23449,
+        "sha256": "5353f38abb88373868774e93ac4027c63a7e96c5ab7a58a9db0559028d3d8137",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_7a6ebf4b-cf04-401b-be68-c8e76fb92f42",
+        "logicalPath": "assets/sounds/hit.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 15037,
+        "sha256": "57cbc9609beb7397726e20ad73de1d841cd0e90dbfdb0c5a32f221caa2542482",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_8fde0da1-517e-49f1-b8f9-144b66629dfb",
+        "logicalPath": "assets/sounds/kick.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 42832,
+        "sha256": "67bd9d775adc1631d120dbb7f53ebcbc72aee1e795e4fbbdf7f6075486b78833",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_c85b1513-b764-468f-a1ca-1f2a24810be6",
+        "logicalPath": "assets/sounds/missile.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 35517,
+        "sha256": "5e1147751ba13c598d3b02dfbf9c99a754532ba8cc54272dd0c284cc3cfe7f9f",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_c6a43244-4fda-42bc-ae08-43ddfe2b68bd",
+        "logicalPath": "assets/sounds/radio-in1.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 26950,
+        "sha256": "dedc07ac38981ee0a968de8e3b2b56c51b7ac906c308b78d9933417bbfe2abad",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_27fd4140-bec1-40f4-bcf5-f01d19d3d0f8",
+        "logicalPath": "assets/sounds/radio-in2.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 27734,
+        "sha256": "832888a41bd9b536cb594dc76b3c4c522e6b94d5b01f55fce9b7b7d324462bbc",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_2d9b63dd-4006-4a47-befa-da736544d7f0",
+        "logicalPath": "assets/sounds/radio-in3.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 25122,
+        "sha256": "9a13bf81a0d5dbc3c17c61296fd5a546d00ec7eeccae68841fff41f1abb7207d",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_1e23eb0d-3c44-4251-8aa1-701f56cf138a",
+        "logicalPath": "assets/sounds/radio-out1.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 24599,
+        "sha256": "3abe814479dcfb8e940b0a1c578d1bed58f511edd558cd330f0903fff26a64bd",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_7bcb525c-c4a2-4a78-914e-31830f38bbe1",
+        "logicalPath": "assets/sounds/radio-out2.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 25905,
+        "sha256": "b8e2fa3ec8f88a8be39cdc47805c62573353814890ff2fb32ee2daa8caafef1c",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_4cbb32d2-d876-4fd7-8dd2-e3a9b96e75a0",
+        "logicalPath": "assets/sounds/radio-out3.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 24077,
+        "sha256": "31fb910a2de964c65f5a3574d40dbe86e47bd3ccbf1c8b6f23bd54722d9021ef",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_dd7f4552-855c-4470-aaad-686a687e2b17",
+        "logicalPath": "assets/sounds/reload.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 24702,
+        "sha256": "b07a5276b7a569180ad6536452d54583929315e45800866e2d8c07f72cc8127c",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_655e6d5b-a55d-417a-854b-00eb14e6c6d5",
+        "logicalPath": "assets/sounds/roll.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 23449,
+        "sha256": "5107901d435566f2c133fe8cf05e006e54314ceeaa97092ef9a3c338ae1e9d79",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_46e6c590-5236-4311-8d63-e0d8abfdf281",
+        "logicalPath": "assets/sounds/seat.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 16134,
+        "sha256": "7e5ede3d8072afc589778efa117c843b41443d77350323eb7ee930f00228b8ef",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_3d924d1f-61c0-4ab2-9109-a3c24b55b4a9",
+        "logicalPath": "assets/sounds/slowmo.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 25643,
+        "sha256": "3bcb5dfbd66676c327909043bf494e01566709679124ca18110218268eab1a97",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_550e5981-12c3-48ce-9066-ab9aae23ea9d",
+        "logicalPath": "assets/sounds/splash.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 63677,
+        "sha256": "4dc53cee0d461a83fb9eab604eabe249f0eea24754ff59d9efe2e3f8ea48d469",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_c03bf6fb-fc39-4ffe-87a7-3c824bf293f1",
+        "logicalPath": "assets/sounds/swish.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 9186,
+        "sha256": "8889df96457a810c6f7e105a1f98abe50a31730041bdc53c4e77acbff1b6191b",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_b9606c4d-f170-4bbe-b4db-65b5e951c613",
+        "logicalPath": "assets/sounds/wake.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 70992,
+        "sha256": "0b3e7ff0e98b31fc124f39175297fb4c50c26578ba40cfe642f946be90aa6e62",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      },
+      {
+        "id": "fast_1660e4e2-1f94-4d06-aacc-e93f80108e85",
+        "logicalPath": "assets/sounds/wind.mp3",
+        "mime": "audio/mpeg",
+        "byteSize": 84889,
+        "sha256": "d5ffa55afa02117246c7b2e4dbd727ffd92ca0c1dbd3c9367fe4d930c236c27c",
+        "createdBy": "KVDdtxpYzh4YjO2GOAzABAkAlWsifFID",
+        "createdAt": 1794878482692,
+        "updatedAt": 1794878482692
+      }
+    ],
+    "previewUrl": "/api/v1/fragments/frag_f88d18ca-218d-4194-abde-ee631568c2af/preview-image?v=5"
+  },
+  "viewer": {
+    "signedIn": false,
+    "member": false,
+    "canRemix": true
+  }
+}
