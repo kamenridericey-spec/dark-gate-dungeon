@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@source "./";
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #081c32; color: #eaf3fc; }
+html, body, #root, main { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+.flight { position: absolute; inset: 0; }
+.flight > div { width: 100%; height: 100%; }
+.settings-toggle { position: fixed; z-index: 30; top: max(16px, env(safe-area-inset-top)); left: 16px; padding: 10px 15px; border: 1px solid #ffffff50; background: #081c32e8; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.settings { position: fixed; z-index: 25; top: 0; bottom: 0; left: 0; width: min(360px, 100vw); padding: 72px 20px 24px; overflow: auto; background: #101b29f5; border-right: 1px solid #ffffff25; box-shadow: 8px 0 40px #0005; }
+.settings h1 { font-size: 24px; font-weight: 700; }
+.settings p { color: #a8bbce; font-size: 13px; margin: 8px 0 16px; }
+.settings header button { border: 1px solid #ffffff40; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.settings details { border-top: 1px solid #ffffff20; margin-top: 20px; padding-top: 12px; }
+.settings summary { cursor: pointer; font-weight: 600; color: #9fd5ff; }
+.setting { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 15px 0; font-size: 13px; }
+.setting label { flex: 1; line-height: 1.5; }
+.setting .range { width: 100%; display: flex; align-items: center; gap: 12px; }
+.range input { flex: 1; min-width: 0; }
+.range output { width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+.setting input { accent-color: #f08040; }
+.setting input[type=checkbox] { width: 19px; height: 19px; }
+.setting select { max-width: 130px; background: #263548; border-radius: 4px; padding: 4px; }
+.settings footer { display: flex; gap: 20px; margin-top: 24px; font-size: 13px; color: #9fd5ff; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #fda85c; outline-offset: 3px; }
