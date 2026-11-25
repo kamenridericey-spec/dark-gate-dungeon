@@ -12,7 +12,7 @@ export function createMap(shuffle) {
   const start = shuffle(inside)[0];
   const patterns = shuffle(PATTERNS);
   const pool = shuffle(patterns.flatMap((p,i) => Array(i===2?11:12).fill(p)));
-  const doors = shuffle([[3,[0]],[5,[0,2]],[15,[0,1]],[12,[0,1,2]]].flatMap(([n,d]) => Array(n).fill(d)));
+  const doors = shuffle([[2,[0]],[4,[0,2]],[14,[0,1]],[14,[0,1,2]],[1,[0,1,2,3]]].flatMap(([n,d]) => Array(n).fill(d)));
   const rooms = Array.from({length: 36}, (_,id) => id===start
     ? {id,pattern:null,doors:[...DIRS],shape:[...DIRS],state:'open'}
     : {id,pattern:pool.pop(),shape:doors.pop(),doors:[],state:'covered'});
@@ -23,9 +23,14 @@ export function createMap(shuffle) {
   }
   return {rooms,start};
 }
+export function hasDoor(room,d){return room.doors.includes(d)||Boolean(room.breachDoors?.includes(d));}
+export function blockedDoor(rooms,id,d){
+  const to=neighbor(id,d);
+  return to===null||(rooms[to].state!=='covered'&&!hasDoor(rooms[to],opposite(d)));
+}
 export function connected(rooms,id,d){
   const to=neighbor(id,d);
-  return to!==null && rooms[id].doors.includes(d) && rooms[to].doors.includes(opposite(d));
+  return to!==null && hasDoor(rooms[id],d) && hasDoor(rooms[to],opposite(d));
 }
 export function reachable(rooms,id){
   const found=new Set([id]), queue=[id];
@@ -38,8 +43,8 @@ export function reachable(rooms,id){
 export function frontiers(rooms,id,breach=false){
   return DIRS.flatMap(d=>{
     const to=neighbor(id,d);
-    return to!==null && rooms[to].state==='covered' && (breach || rooms[id].doors.includes(d))
-      ? [{to,d,breach:!rooms[id].doors.includes(d)}]:[];
+    return to!==null && rooms[to].state==='covered' && (breach || hasDoor(rooms[id],d))
+      ? [{to,d,breach:!hasDoor(rooms[id],d)}]:[];
   });
 }
 export function orientations(rooms,id,entry){
@@ -48,10 +53,9 @@ export function orientations(rooms,id,entry){
     const doors=rooms[id].shape.map(d=>(d+rotation)%4).sort();
     if(!doors.includes(entry)) continue;
     const viable=doors.filter(d=>{
-      const to=neighbor(id,d);
-      return d===entry || (to!==null && (rooms[to].state==='covered' || rooms[to].doors.includes(opposite(d))));
+      return d===entry || !blockedDoor(rooms,id,d);
     });
-    if(!choices.has(viable.join())) choices.set(viable.join(),{rotation,doors,viable});
+    if(!choices.has(doors.join())) choices.set(doors.join(),{rotation,doors,viable});
   }
   return [...choices.values()];
 }

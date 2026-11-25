@@ -22,6 +22,12 @@ with sync_playwright() as manager:
     assert page.locator('.room:not(.preview)').count() == 36
     assert page.locator('.room.entrance .door').count() == 4
     assert page.locator('.room.covered .door').count() == 0
+    assert set(page.locator('.room.covered .swatch').all_text_contents()) == {'○','△','×'}
+    page.locator('.pile',has_text='遭遇牌堆').hover()
+    assert '抽空后' in page.locator('#game-tooltip').inner_text()
+    click('item')
+    assert page.locator('.item-card p').inner_text().strip()
+    click('close')
     page.screenshot(path='/tmp/dungeon-v3-board.png')
     action('team').first.click()
     page.locator('.room.covered.reachable .room-button').first.click()
@@ -43,6 +49,8 @@ with sync_playwright() as manager:
         click('trade','yes')
     click('roll')
     assert page.locator('.dice b').count() in (1,2)
+    assert page.locator('.dice svg').count()==page.locator('.dice b').count()
+    assert page.locator('.dice.rolling').count()==1
     page.screenshot(path='/tmp/dungeon-v3-dice.png')
     click('resolve')
     for _ in range(14):
@@ -68,11 +76,21 @@ with sync_playwright() as manager:
     click('choose-side','city')
     click('start')
     assert action('city-pick').count()==6
+    assert page.locator('.city-upgrade').get_by_role('button',name='升级迷宫 · 0/5 魂').is_visible()
     click('pattern','方格')
     for i in range(3):click('city-pick',i)
     click('deploy')
-    for _ in range(70):
-        if action('orient').count():
+    page.get_by_role('dialog',name='冒险者行动结果').wait_for(timeout=7000)
+    summary=page.locator('.feedback-list').inner_text()
+    assert '进入' in summary or '赶路' in summary or '结束行动' in summary
+    page.wait_for_timeout(400)
+    assert page.get_by_role('dialog',name='冒险者行动结果').is_visible()
+    assert page.locator('#city .ward').count()==1
+    click('feedback-next')
+    for _ in range(90):
+        if action('feedback-next').count():
+            click('feedback-next')
+        elif action('orient').count():
             click('orient')
         elif action('deploy').count():
             break
@@ -91,7 +109,7 @@ with sync_playwright() as manager:
     click('team',2)
     page.locator('.room.covered.reachable .room-button').first.click()
     click('explore');click('bearer',2);click('reveal',2);click('continue')
-    assert '失败 2 → 1' in page.locator('.offer-line').inner_text()
+    assert '失败翻 2 件' in page.locator('.offer-line').inner_text()
     click('trade','yes');click('roll');click('resolve')
     assert '检定失败' in page.locator('.kicker').inner_text()
     assert action('buy').count()==2
@@ -101,4 +119,4 @@ with sync_playwright() as manager:
     page.get_by_role('button',name='对局记录').click()
     assert '城主 +1 魂 · 实际成交' in page.locator('.journal').inner_text()
     assert not errors,errors
-    print('PASS: adventurer clicks and auto-city; city deploy and auto-adventurers; hidden tile doors and card backs; mobile width; failed charm trade opens two goods and pays one trade soul; zero browser errors.')
+    print('PASS: adventurer clicks and auto-city; city deploy and auto-adventurers; tile symbols and card backs, hover tips, dossier and dice animation, opponent result pauses, mobile width; failed charm trade opens two goods and pays one trade soul; zero browser errors.')

@@ -1,5 +1,5 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS} from './map.mjs';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName} from './rules.mjs';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=091';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName} from './rules.mjs?v=091';
 
 export class Game {
   constructor(data,seed=Date.now()){
@@ -118,7 +118,7 @@ export class Game {
   reveal(slot){
     this.assert(this.phase==='door'&&this.slots[slot],'没有可揭开的遭遇');
     const e=this.encounter,room=this.rooms[e.to],direction=opposite(e.entry);
-    if(!this.rooms[e.from].doors.includes(direction)){this.rooms[e.from].doors.push(direction);this.metrics.breaches++;this.note('全队无可达新门，本场破墙进入。');}
+    if(!hasDoor(this.rooms[e.from],direction)){(this.rooms[e.from].breachDoors??=[]).push(direction);this.metrics.breaches++;this.note('全队无可达新门，本场破墙进入。');}
     room.state='pending';room.doors=[e.entry];
     for(const id of e.party){this.move(id,e.to);this.heroes[id].state='explored';}
     this.attach();e.hit=room.pattern===this.pattern;
@@ -289,9 +289,10 @@ export class Game {
     const e=this.encounter;
     this.assert(this.phase==='orient'&&e.orientations[index],'选一个保留来路的朝向');
     const chosen=e.orientations[index];const room=this.rooms[e.to];
+    this.assert(chosen.doors.length===room.shape.length,'旋转必须保留地砖门数');
     room.state='open';room.doors=chosen.doors;
     this.note(`${e.orientCity?'城主':this.heroes[e.actor].name} 为房间 ${e.to+1} 定向（${chosen.rotation*90}°）。`);
-    this.metrics.rotations++;if(e.orientCity){this.metrics.cityRotations++;if(e.orientations.length>1)this.metrics.meaningfulCityRotations++;}
+    this.metrics.rotations++;if(e.orientCity){this.metrics.cityRotations++;if(new Set(e.orientations.map(o=>o.viable.join())).size>1)this.metrics.meaningfulCityRotations++;}
     this.eventDiscard.push(e.card);if(e.monster)this.monsterDiscard[e.card.tier].push(e.monster);
     this.encounter=null;
     if(this.rooms.every(r=>r.state==='open'))this.end('城主','迷宫已全部探索');

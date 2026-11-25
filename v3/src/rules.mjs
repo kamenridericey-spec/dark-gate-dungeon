@@ -1,4 +1,4 @@
-export const VERSION='0.9.0';
+export const VERSION='0.9.1';
 export const ROLES=['体魄','心智','魅力'];
 export const COSTS=[5,6,8];
 export const WIN_FRAGMENTS=5;

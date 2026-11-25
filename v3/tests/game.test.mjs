@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {Game} from '../src/engine.mjs';
 import {aiStep} from '../src/ai.mjs';
 import {applyItem} from '../src/items.mjs';
-import {neighbor,connected,opposite} from '../src/map.mjs';
+import {neighbor,connected,opposite,orientations} from '../src/map.mjs';
 import {recordPattern} from '../src/rules.mjs';
 
 const data=Object.fromEntries(['encounters','items','monsters'].map(k=>[k,JSON.parse(readFileSync(new URL('../data/'+k+'.json',import.meta.url)))]));
@@ -113,4 +113,34 @@ test('seeded opponents finish games in all three strategies without stuck phases
       assert.ok(g.rooms.some(r=>!r.pattern&&neighbor(r.id,0)!==null));
     }
   }
+});
+
+test('a corner-facing wall keeps its printed door and remains a distinct rotation',()=>{
+  const g=fresh(), id=0, entry=1;
+  const room=g.rooms[id];
+  room.shape=[0,1,2];room.state='pending';
+  const options=orientations(g.rooms,id,entry);
+  assert.equal(options.length,3);
+  assert.ok(options.every(o=>o.doors.length===3&&o.doors.includes(entry)));
+  assert.ok(options.some(o=>o.viable.length<o.doors.length));
+});
+test('an AI scout consumes insight and assigns the revealed check to a matching teammate',()=>{
+  const g=fresh();
+  g.hand[0]=data.encounters.find(c=>c.id==='D-I-06');
+  g.prepare('条纹',[0,1,2]);
+  const actor=g.heroes[0],insight=g.unique(data.items.cards.find(c=>c.effect==='insight'));
+  actor.hand=[insight]; g.heroes[1].soul=2;
+  const edge=g.targets()[0];g.explore(edge.to,[0,1],0);
+  aiStep(g);
+  assert.equal(g.metrics.items,1);assert.ok(g.slots[0].open);
+  aiStep(g);
+  assert.equal(g.encounter.bearer,1);
+  assert.equal(g.encounter.card.attribute,'心智');
+});
+test('breaching does not change a printed door layout',()=>{
+  const g=fresh();g.prepare('条纹',[0,1,2]);g.rooms[g.start].doors=[];
+  const edge=g.targets()[0];g.explore(edge.to,[0],0);g.reveal(0);
+  assert.deepEqual(g.rooms[g.start].doors,[]);
+  assert.deepEqual(g.rooms[g.start].breachDoors,[edge.d]);
+  assert.ok(connected(g.rooms,g.start,edge.d));
 });

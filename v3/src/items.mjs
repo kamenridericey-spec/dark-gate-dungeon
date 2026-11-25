@@ -1,4 +1,4 @@
-import {ROLES} from './rules.mjs';
+import {ROLES} from './rules.mjs?v=091';
 
 const windows = {
   action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
