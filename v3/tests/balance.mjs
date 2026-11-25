@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {Game} from '../src/engine.mjs';
 import {aiStep} from '../src/ai.mjs';
-import {COSTS,CITY_SOUL_LIMIT,MIN_TIER_III_ROUNDS,taskReward} from '../src/rules.mjs';
+import {COSTS,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,TASK_REWARD} from '../src/rules.mjs';
 const data=Object.fromEntries(['encounters','items','monsters'].map(key=>[key,JSON.parse(readFileSync(new URL('../data/'+key+'.json',import.meta.url)))]));
 const base=Number(process.argv[2]??1001);
 const count=Number(process.argv[3]??100);
@@ -37,4 +37,4 @@ function summarize(rows){
 }
 const summary=summarize(games);
 const groups=Object.fromEntries(['aggressive','dynamic','cautious'].map(name=>[name,summarize(games.filter(g=>g.strategy===name))]));
-console.log(JSON.stringify({configuration:{costs:COSTS,citySoulLimit:CITY_SOUL_LIMIT,minTierIIIRounds:MIN_TIER_III_ROUNDS,taskRewards:[taskReward(1),taskReward(3)],dc:Object.fromEntries(['I','II','III'].map(k=>[k,data.encounters.find(c=>c.tier===k).dc]))},base,summary,groups,games},null,2));
+console.log(JSON.stringify({configuration:{costs:COSTS,citySoulLimit:CITY_SOUL_LIMIT,cityWinLevel:CITY_WIN_LEVEL,taskReward:TASK_REWARD,dc:Object.fromEntries(['I','II','III','IV'].map(k=>[k,data.encounters.find(c=>c.tier===k).dc]))},base,summary,groups,games},null,2));

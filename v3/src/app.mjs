@@ -1,9 +1,9 @@
-import {Game} from './engine.mjs?v=092';
-import {aiStep} from './ai.mjs?v=092';
-import {applyItem,itemTargets} from './items.mjs?v=092';
-import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?v=092';
-import {diceMarkup,animateDice} from './dice.mjs?v=092';
-import {COSTS,ROLES,VERSION,stanceName,taskReward,CITY_SOUL_LIMIT,MIN_TIER_III_ROUNDS} from './rules.mjs?v=092';
+import {Game} from './engine.mjs?v=093';
+import {aiStep} from './ai.mjs?v=093';
+import {applyItem,itemTargets} from './items.mjs?v=093';
+import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?v=093';
+import {diceMarkup,animateDice} from './dice.mjs?v=093';
+import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?v=093';
 
 const $=id=>document.getElementById(id);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -23,7 +23,7 @@ const effects={
 };
 function describeEffect(effect){
   const tuple=effects[effect.effect]??['?','未知效果'];
-  const name=effect.effect==='heal'&&effect.target==='explorers'?'本次每名探索者各恢复魂':tuple[1];
+  const name=effect.effect==='heal'&&effect.target==='explorers'?'本次每名探索者各恢复魂':effect.effect==='loseSoul'&&effect.target==='livingParty'?'全体存活冒险者各失魂':effect.effect==='loseSoul'&&effect.target==='explorers'?'本次探索者各失魂':tuple[1];
   const showAmount=!['orientRoom','monsterReward','completeOffer','none'].includes(effect.effect);
   return badge(`${icon(tuple[0],name)}${showAmount?`<b>${effect.amount}</b>`:''}`,`${name}${showAmount?' ×'+effect.amount:''}`);
 }
@@ -55,21 +55,20 @@ function itemCard(c,act='',value='',disabled=false){
 const cardRow=content=>`<div class="cards">${content}</div>`;
 function upgradeLabel(g){
   const cost=COSTS[g.level-1];
-  if(g.tierIIIWait)return `升 IV · 还需 ${g.tierIIIWait} 轮`;
   if(g.mustUpgrade)return `先升级迷宫 · ${cost} 魂`;
   if(g.canUpgrade)return `↑ 升级迷宫 · ${cost} 魂`;
   return `升级迷宫 · ${g.citySoul}/${cost} 魂`;
 }
-const upgradeTip=g=>g.tierIIIWait?`III 级需完成 ${MIN_TIER_III_ROUNDS} 大轮，随后支付 ${COSTS[2]} 魂升 IV。城主最多持有 ${CITY_SOUL_LIMIT} 魂。`:'每个城主准备阶段最多升一级。首次够魂升 II、III 时，可以延后一个大轮。';
+const upgradeTip=()=>`城主最多持有 ${CITY_SOUL_LIMIT} 魂。准备阶段每轮可升一级，升 ${tier(CITY_WIN_LEVEL)} 即获胜。首次够魂升 II 或 III 可以延后一轮。`;
 function updateBoard(){
   const g=game;
   $('table').classList.toggle('pre-game',!g);
   if(!g)return;
-  $('city').innerHTML=`<div class="panel"><div class="section-title">${icon('♜','城主')} 城主 <span>${['I','II','III','IV'][g.level-1]}</span></div>
+  $('city').innerHTML=`<div class="panel"><div class="section-title">${icon('♜','城主')} 城主 <span>${tier(g.level)}</span></div>
     <div class="stats">${badge(icon('♥','城主魂')+' '+g.citySoul+'/'+(COSTS[g.level-1]??'—'),'城主当前魂／下次升级费用；最多持有 '+CITY_SOUL_LIMIT+' 魂')}
     ${badge(icon('◷','大轮')+' '+g.round,'当前大轮')}</div>
-    ${human==='city'&&g.level<4?button(upgradeLabel(g),'upgrade','','upgrade-action '+(g.canUpgrade?'primary':''),!g.canUpgrade,upgradeTip(g)):''}
-    ${g.level===3&&g.tierIIIWait?badge('升 IV 倒数 '+g.tierIIIWait+' 轮',upgradeTip(g)):''}
+    ${human==='city'&&g.level<CITY_WIN_LEVEL?button(upgradeLabel(g),'upgrade','','upgrade-action '+(g.canUpgrade?'primary':''),!g.canUpgrade,upgradeTip(g)):''}
+    <div class="stats">${badge(`${g.level-1}/${COSTS.length} 次升级`,'依次支付 '+COSTS.join('／')+' 魂升阶；升 V 即胜')}</div>
     <div class="ward"><h3>本轮机关</h3><span>${g.pattern&&(g.revealed||human==='city'||g.excluded.size===2)?pattern(g.pattern)+' '+patternName(g.pattern):'未揭晓'}</span></div>
     ${human==='party'&&g.excluded.size?`<div class="ward excluded"><h3>已排除</h3><span>${[...g.excluded].map(pattern).join('')}</span></div>`:''}
     <h3>牌堆</h3><div class="pile-list">
@@ -80,7 +79,7 @@ function updateBoard(){
     ${badge('物资牌堆 '+g.goods.length,'普通物资剩余张数。')}${badge('物资弃牌 '+g.goodsDiscard.length,'已公开弃置的普通物资。')}</div></div>
     <div class="panel objectives"><div class="section-title">${icon('◆','冒险者碎片')} 碎片 <span>${g.fragments}/5</span></div>
     <div class="progress" title="冒险者收集五枚碎片获胜">${Array.from({length:5},(_,i)=>`<i class="${i<g.fragments?'filled':''}"></i>`).join('')}</div>
-    <h3>共鸣 / 巡礼</h3><div class="stats" title="最近两次有效探索。第三次同纹或三纹各异可得碎片，III 级每次任务获得两枚。">${[0,1].map(i=>g.history[i]?pattern(g.history[i]):badge('–','空位')).join('')}${badge('◆ '+taskReward(g.level),'本阶段每次任务奖励的碎片数')}</div></div>`;
+    <h3>共鸣 / 巡礼</h3><div class="stats" title="最近两次有效探索。三次同纹或三纹各异完成任务，各奖励一枚。任务与牌面奖励同时达成时，各得一枚。">${[0,1].map(i=>g.history[i]?pattern(g.history[i]):badge('–','空位')).join('')}${badge('◆ '+TASK_REWARD,'本阶段每次任务奖励的碎片数')}</div></div>`;
   $('signal').textContent=localize(g.logs.at(-1)?.text??'');
   updateMap();
   $('heroes').innerHTML=g.heroes.map(h=>`<section class="panel hero ${h.id===g.turn&&g.side==='party'?'active':''}">
@@ -141,7 +140,7 @@ function stancePanel(){
 }
 function scene(){
   const g=game,e=g?.encounter;
-  if(cover==='rules')return modal('桌边速览',`<div class="rules-copy"><p><strong>探索</strong>　点相邻盖房，然后选埋牌。遭遇结算后翻地砖，按来路定向。</p><p><strong>共鸣 / 巡礼</strong>　记最近两次有效成功。三种相同或各异得一片，III 级得两片，其他情况保留最近两个。</p><p><strong>骰法</strong>　花纹命中给城主一项优势；专长匹配给承担者一项。城主优势取低，冒险者优势取高。</p><p><strong>交易</strong>　先看报价。成功翻两件，失败翻一件，魅力多一件。实际买到才记成交魂。</p><p><strong>终局</strong>　冒险者五片胜。城主至多持有八魂，III 级完成八轮后才能支付八魂升 IV。升 IV、全员失魂或地图探索耗尽时城主胜。</p></div>`,button('返回','close','','primary'),false);
+  if(cover==='rules')return modal('桌边速览',`<div class="rules-copy"><p><strong>探索</strong>　点相邻盖房，然后选埋牌。遭遇结算后翻地砖，按来路定向。</p><p><strong>共鸣 / 巡礼</strong>　记最近两次有效成功。三种相同或各异得一片，若同时拿到牌面碎片和任务碎片，两份都领。</p><p><strong>骰法</strong>　花纹命中给城主一项优势；专长匹配给承担者一项。城主优势取低，冒险者优势取高。</p><p><strong>交易</strong>　先看报价。成功翻两件，失败翻一件，魅力多一件。实际买到才记成交魂。</p><p><strong>终局</strong>　冒险者五片胜。城主至多持有八魂，准备阶段可付魂升一级，四次费用依次为 ${COSTS.join('／')}。升 V、全员失魂或地图探索耗尽时城主胜。</p></div>`,button('返回','close','','primary'),false);
   if(cover==='journal')return modal('对局记录',`<div class="journal">${g?.logs.slice().reverse().map(l=>`<p><small>${l.round}</small>${escape(localize(l.text))}</p>`).join('')??''}</div>`,button('导出记录','export')+button('返回','close','','primary'),false);
   if(cover==='reset')return modal('返回开局？','<p class="hint">本局进度将结束，可以先导出记录。</p>',button('继续本局','close')+button('返回开局','reset','','primary'),false);
   if(cover==='mapTool')return '';
@@ -188,7 +187,7 @@ function scene(){
   }
   if(g.phase==='check'||g.phase==='rolled')return modal(e.card.kind+'检定',stancePanel()+toolBar(),
     g.phase==='check'?button('掷骰','roll','','primary'):button(` ${diceBusy?'掷骰中…':('取 '+g.value()+' · '+(g.value()>=e.card.dc?'成功':'失败'))}`,'resolve','','primary',diceBusy),true,e.card.name+' · DC'+e.card.dc);
-  if(g.phase==='damage')return modal('即将失魂',`<div class="damage">${g.heroes[e.damage.target].name} ${icon('−♥','待执行的失魂')}${e.damage.amount}</div>`+toolBar(),button('承受伤害','damage','','primary'));
+  if(g.phase==='damage')return modal('即将失魂',`<div class="damage">${e.damage.area?e.damage.targets.map(id=>g.heroes[id].name).join('、')+' 各':g.heroes[e.damage.target].name} ${icon('−♥','待执行的失魂')}${e.damage.amount}</div>`+toolBar(),button('承受伤害','damage','','primary'));
   if(g.phase==='goods'){
     const possible=g.paymentOptions().some(p=>g.recipients(p.key).length);
     return modal('选择货物',`<div class="offer-line">${badge(price(e.card.offer),'选择购买时才支付')}${badge(e.charm?'✧ 魅力':'普通报价',e.charm?'多展示一件':'按检定结果展示货物')}</div>`+
@@ -270,7 +269,7 @@ function exportLog(){
   if(!game)return;
   const blob=new Blob([JSON.stringify({version:VERSION,seed:game.seed,seat:human,log:game.logs,trace:game.trace,metrics:game.metrics,winner:game.winner},null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
-  link.href=url;link.download='暗门地牢_V092_记录.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  link.href=url;link.download='暗门地牢_V093_记录.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function handle(action,value){
   if(action==='choose-side'){human=value;render();return;}

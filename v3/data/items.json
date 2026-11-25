@@ -375,6 +375,46 @@
       "implementedInV2": true,
       "originalKind": "装备",
       "inventoryType": "unified"
+    },
+    {
+      "id": "IV-ITEM-01",
+      "name": "余火匣",
+      "tier": 4,
+      "effect": "healAll",
+      "windows": [
+        "检定前"
+      ],
+      "text": "与持有者同房的冒险者各恢复1魂。"
+    },
+    {
+      "id": "IV-ITEM-02",
+      "name": "斜齿骰垫",
+      "tier": 4,
+      "effect": "floor10",
+      "windows": [
+        "检定后"
+      ],
+      "text": "选择一颗骰，将低于10的骰面改为10。取骰规则保持不变。"
+    },
+    {
+      "id": "IV-ITEM-03",
+      "name": "校准砝码",
+      "tier": 4,
+      "effect": "plus2",
+      "windows": [
+        "检定后"
+      ],
+      "text": "选一颗骰，将骰面加2，最高20。"
+    },
+    {
+      "id": "IV-ITEM-04",
+      "name": "薄钢护环",
+      "tier": 4,
+      "effect": "guard2",
+      "windows": [
+        "检定前"
+      ],
+      "text": "抵挡本场即将失去的至多2魂。"
     }
   ],
   "loot": {
@@ -501,6 +541,16 @@
         "检定前"
       ],
       "text": "这场遭遇抵挡接下来至多2点失魂。"
+    },
+    "MON-IV-02": {
+      "id": "MON-IV-02",
+      "name": "缝门蛛的第二线轴",
+      "tier": 4,
+      "effect": "reverseGuard",
+      "windows": [
+        "检定前"
+      ],
+      "text": "逆转当前优势，并抵挡本场接下来1点失魂。"
     }
   }
 }

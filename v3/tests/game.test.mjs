@@ -152,19 +152,37 @@ test('breaching does not change a printed door layout',()=>{
   assert.ok(connected(g.rooms,g.start,edge.d));
 });
 
-test('late tasks pay two fragments and retain a five-fragment display cap',()=>{
-  const g=fresh();g.level=3;g.unlock(3);g.fragments=3;
-  const e=setup(g,'D-I-06');const pattern=g.rooms[e.to].pattern;
+test('tasks reward one shard at IV, and a separately earned encounter shard stacks',()=>{
+  const g=fresh();g.level=4;g.unlock(4);g.fragments=3;
+  const e=setup(g,'IV-06');const pattern=g.rooms[e.to].pattern;
   g.history=[pattern,pattern];complete(g,20);finish(g);
-  assert.equal(g.metrics.task,2);assert.equal(g.fragments,5);assert.equal(g.winner,'冒险者');
-  const early=fresh();const opening=setup(early,'D-I-06');const p=early.rooms[opening.to].pattern;
-  early.history=[p,p];complete(early,20);finish(early);assert.equal(early.fragments,1);
+  assert.equal(g.metrics.cardFragments,1);assert.equal(g.metrics.task,1);assert.equal(g.fragments,5);assert.equal(g.winner,'冒险者');
+  const regular=fresh();regular.level=4;regular.unlock(4);
+  const opening=setup(regular,'D-I-06');const p=regular.rooms[opening.to].pattern;
+  regular.history=[p,p];complete(regular,20);finish(regular);assert.equal(regular.fragments,1);
+  assert.deepEqual(regular.history,[]);
 });
-test('city eight-soul cap and eight full rounds at III gate the final upgrade',()=>{
-  const g=fresh();g.level=3;g.metrics.thirdTierRound=2;g.round=9;g.citySoul=7;
-  g.income('round');g.income('trade');g.income('advantage');
-  assert.equal(g.citySoul,8);assert.equal(g.tierIIIWait,1);assert.equal(g.canUpgrade,false);
-  g.round=10;assert.equal(g.canUpgrade,true);g.upgrade();assert.equal(g.winner,'城主');
+test('III can upgrade immediately with seven soul, IV unlocks content, and V wins at eight',()=>{
+  const g=fresh();g.level=3;g.metrics.thirdTierRound=g.round;g.hand.pop();
+  g.citySoul=7;assert.equal(g.canUpgrade,true);
+  const deckSize=g.events.length;
+  g.upgrade();assert.equal(g.level,4);assert.equal(g.citySoul,0);assert.equal(g.winner,undefined);
+  assert.equal(g.hand.at(-1).tier,'IV');assert.equal(g.events.length,deckSize+11);
+  assert.equal(g.monsters.IV.length,4);assert.equal(g.goods.filter(c=>c.tier===4).length,4);assert.equal(g.canUpgrade,false);
+  g.prepare('条纹',[0,1,2]);g.wait();g.wait();g.wait();
+  for(let i=0;i<10;i++)g.income('trade');
+  assert.equal(g.citySoul,8);assert.equal(g.canUpgrade,true);g.upgrade();
+  assert.equal(g.level,5);assert.equal(g.reason,'升至 V 级');assert.equal(g.winner,'城主');
+});
+test('IV chamber damage distinguishes participants from all living adventurers',()=>{
+  const g=fresh();g.level=4;g.unlock(4);
+  const e=setup(g,'IV-05',0,false,[0,1]);g.heroes[2].pos=g.start;e.guard=1;
+  complete(g,1);assert.deepEqual(e.damage.targets,[0,1,2]);g.damage();finish(g);
+  assert.deepEqual(g.heroes.map(h=>h.soul),[4,2,2]);
+  const next=fresh();next.level=4;next.unlock(4);
+  const fight=setup(next,'IV-01',0,false,[0,1]);next.startCheck();complete(next,1);
+  assert.deepEqual(fight.damage.targets,[0,1]);next.damage();finish(next);
+  assert.deepEqual(next.heroes.map(h=>h.soul),[3,2,3]);
 });
 test('a skipped II or III upgrade locks the next deployment until upgrade',()=>{
   const g=fresh();g.citySoul=5;g.prepare('条纹',[0,1,2]);
@@ -173,7 +191,7 @@ test('a skipped II or III upgrade locks the next deployment until upgrade',()=>{
   g.upgrade();assert.equal(g.level,2);assert.equal(g.mustUpgrade,false);g.prepare('条纹',[]);
 });
 test('encounter DC values depend on their card tier',()=>{
-  for(const [key,dc] of Object.entries({I:8,II:10,III:12})){
+  for(const [key,dc] of Object.entries({I:7,II:9,III:11,IV:13})){
     const cards=data.encounters.filter(c=>c.tier===key);
     assert.equal(cards.length,12); assert.ok(cards.every(c=>c.dc===dc));
   }

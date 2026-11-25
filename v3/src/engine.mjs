@@ -1,5 +1,5 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=092';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,taskReward,CITY_SOUL_LIMIT,MIN_TIER_III_ROUNDS} from './rules.mjs?v=092';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=093';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?v=093';
 
 export class Game {
   constructor(data,seed=Date.now()){
@@ -8,7 +8,7 @@ export class Game {
     this.rooms=map.rooms; this.start=map.start;
     this.heroes=['阿栎','苔丝','灰羽'].map((name,id)=>({id,name,role:ROLES[id],specialty:ROLES[id],soul:MAX_SOUL[id],max:MAX_SOUL[id],capacity:CAPACITY[id],pos:this.start,state:'ready',hand:[],carried:null}));
     this.level=1; this.round=1; this.citySoul=0; this.fragments=0; this.history=[]; this.turn=0;
-    this.events=[]; this.eventDiscard=[]; this.goods=[]; this.goodsDiscard=[]; this.monsters={}; this.monsterDiscard={I:[],II:[],III:[]};
+    this.events=[]; this.eventDiscard=[]; this.goods=[]; this.goodsDiscard=[]; this.monsters={}; this.monsterDiscard={I:[],II:[],III:[],IV:[]};
     this.pattern=null; this.revealed=false; this.excluded=new Set();
     this.hand=[]; this.slots=[null,null,null]; this.logs=[]; this.trace=[]; this.encounter=null;
     this.metrics={firstFragmentRound:null,firstUpgradeRound:null,thirdTierRound:null,itemEffects:{},rooms:0,checks:0,success:0,breaches:0,task:0,cardFragments:0,cityTurns:0,rotations:0,cityRotations:0,meaningfulCityRotations:0,trades:0,items:0,tradeOffers:0,tradeAccepted:0,group:0,income:{round:0,advantage:0,trade:0}};
@@ -26,7 +26,7 @@ export class Game {
     const key=tier(level), encounters=this.data.encounters.filter(c=>c.tier===key), goods=this.data.items.cards.filter(c=>c.tier===level), monsters=this.data.monsters[key];
     this.events=this.shuffle([...this.events,...encounters]); this.goods=this.shuffle([...this.goods,...goods.map(c=>this.unique(c))]);
     this.monsters[key]=this.shuffle(monsters);
-    if(level>1)this.note(`${key}级解锁：${encounters.length}张遭遇（DC${encounters[0].dc}）、${goods.length}张普通物资、${monsters.length}只怪物。${level===3?'解锁怪物碎片，共鸣与巡礼奖励为2枚。':''}`);
+    if(level>1)this.note(`${key}级解锁：${encounters.length}张遭遇（DC${encounters[0].dc}）、${goods.length}张普通物资、${monsters.length}只怪物。${level===3?'解锁怪物碎片。':''}`);
   }
   draw(stack,discard,n,label){
     const cards=[];
@@ -43,16 +43,15 @@ export class Game {
   get actor(){return this.heroes[this.turn];}
   get buyer(){return this.heroes[this.encounter.bearer];}
   get need(){return this.slots.filter(s=>!s).length;}
-  get tierIIIWait(){return this.level===3&&this.metrics.thirdTierRound!==null?Math.max(0,MIN_TIER_III_ROUNDS-(this.round-this.metrics.thirdTierRound)):0;}
-  get canUpgrade(){return this.phase==='city'&&!this.upgraded&&this.citySoul>=COSTS[this.level-1]&&this.tierIIIWait===0;}
+  get canUpgrade(){return this.phase==='city'&&!this.upgraded&&this.level<CITY_WIN_LEVEL&&this.citySoul>=COSTS[this.level-1];}
   get mustUpgrade(){return this.canUpgrade&&this.level<3&&this.upgradeDue===this.level;}
   upgrade(){
     this.assert(this.canUpgrade,'当前不能升级');
     this.citySoul-=COSTS[this.level-1];this.upgraded=true;this.upgradeDue=null;this.level++;
     if(this.level===2)this.metrics.firstUpgradeRound=this.round;
     if(this.level===3)this.metrics.thirdTierRound=this.round;
-    this.note(`城主升至${tier(this.level)??'IV'}级。`);
-    if(this.level===4){this.end('城主','升至 IV 级');return;}
+    this.note(`城主升至${tier(this.level)}级。`);
+    if(this.level===CITY_WIN_LEVEL){this.end('城主',`升至 ${tier(CITY_WIN_LEVEL)} 级`);return;}
     this.unlock(this.level);
     const newTierIndex=this.events.findIndex(card=>card.tier===tier(this.level));
     const extra=newTierIndex<0?undefined:this.events.splice(newTierIndex,1)[0];
@@ -197,8 +196,15 @@ export class Game {
       case 'fragment':this.addFragment(fx.amount,'遭遇');again();break;
       case 'heal':for(const id of fx.target==='explorers'?e.party:[h.id])this.heal(id,fx.amount);again();break;
       case 'loseSoul':
-        e.damage={target:h.id,amount:fx.amount,resume:()=>again()};
-        this.phase='damage';this.note(`${h.name} 即将失去 ${fx.amount} 魂。`);break;
+        {
+          const area=fx.target==='explorers'||fx.target==='livingParty';
+          const targets=area?this.heroes.filter(ally=>ally.soul&&(fx.target==='livingParty'||e.party.includes(ally.id))).map(ally=>ally.id):[h.id];
+          if(!targets.length){again();break;}
+          e.damage={target:h.id,targets,area,amount:fx.amount,resume:()=>again()};
+          this.phase='damage';
+          this.note(area?`${targets.map(id=>this.heroes[id].name).join('、')} 各即将失去 ${fx.amount} 魂。`:`${h.name} 即将失去 ${fx.amount} 魂。`);
+          break;
+        }
       case 'discardItem':
         if(!h.hand.length){this.note(`${h.name} 无物可弃。`);again();break;}
         this.choose('选择弃置物品','party',h.hand.map(item=>({label:item.name,card:item})),i=>{
@@ -218,10 +224,16 @@ export class Game {
   }
   damage(){
     const e=this.encounter;this.assert(this.phase==='damage'&&e.damage,'没有待结算伤害');
-    const {target,amount,resume}=e.damage;const blocked=Math.min(amount,e.guard);e.guard-=blocked;
-    const h=this.heroes[target],before=h.soul;h.soul=Math.max(0,h.soul-amount+blocked);
-    if(!h.soul&&e.coffin&&before>0){h.soul=1;e.coffin=false;}
-    this.note(`${h.name} 魂 ${before} → ${h.soul}${blocked?`（护住 ${blocked}）`:''}。`);
+    const {target,targets,area,amount,resume}=e.damage;
+    for(const id of area?targets:[target]){
+      const protectedTarget=!area||id===e.bearer;
+      const blocked=protectedTarget?Math.min(amount,e.guard):0;
+      e.guard-=blocked;
+      const h=this.heroes[id],before=h.soul;
+      h.soul=Math.max(0,h.soul-amount+blocked);
+      if(!h.soul&&e.coffin&&before>0&&protectedTarget){h.soul=1;e.coffin=false;}
+      this.note(`${h.name} 魂 ${before} → ${h.soul}${blocked?`（护住 ${blocked}）`:''}。`);
+    }
     this.attach();if(this.heroes.every(a=>!a.soul)){this.end('城主','全员失魂');return;}
     e.damage=null;resume();
   }
@@ -277,8 +289,9 @@ export class Game {
     if(options.length===1)selectPayment(0);else this.choose('选择付款物','party',options,selectPayment);
   }
   addFragment(n,source){
+    if(this.winner)return;
     if(!this.fragments)this.metrics.firstFragmentRound=this.round;
-    n=Math.min(n,WIN_FRAGMENTS-this.fragments);
+    n=Math.min(n,1,WIN_FRAGMENTS-this.fragments);
     this.fragments+=n;if(source==='共鸣'||source==='巡礼')this.metrics.task+=n;else this.metrics.cardFragments+=n;
     this.note(`+${n} 碎片 · ${source}（${this.fragments}/${WIN_FRAGMENTS}）`);
     if(this.fragments>=WIN_FRAGMENTS)this.end('冒险者','集齐五枚碎片');
@@ -287,9 +300,10 @@ export class Game {
     if(this.winner)return;
     const e=this.encounter;
     if(e.success&&(!e.card.offer||e.traded)){
-      const next=recordPattern(this.history,this.rooms[e.to].pattern);this.history=next.history;
+      const next=recordPattern(this.history,this.rooms[e.to].pattern);
+      this.history=next.history;
       this.note(`任务记录：${this.history.join(' · ')||'清空'}。`);
-      if(next.task)this.addFragment(taskReward(this.level),next.task);
+      if(next.task)this.addFragment(TASK_REWARD,next.task);
     }
     if(this.winner)return;
     if(e.mode===-1)this.income('advantage');if(e.traded)this.income('trade');

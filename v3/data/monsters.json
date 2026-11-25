@@ -132,5 +132,45 @@
         "amount": 1
       }
     }
+  ],
+  "IV": [
+    {
+      "id": "MON-IV-01",
+      "name": "碎冠巨像",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-IV-02",
+      "name": "缝门蛛",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "缝门蛛的第二线轴",
+        "lootRef": "MON-IV-02"
+      }
+    },
+    {
+      "id": "MON-IV-03",
+      "name": "核壳兽",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-IV-04",
+      "name": "失声钟兽",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    }
   ]
 }

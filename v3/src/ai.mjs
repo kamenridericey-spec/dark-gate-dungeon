@@ -1,6 +1,6 @@
-import {PATTERNS,frontiers,neighbor} from './map.mjs?v=092';
-import {recordPattern,taskReward} from './rules.mjs?v=092';
-import {applyItem,itemTargets} from './items.mjs?v=092';
+import {PATTERNS,frontiers,neighbor} from './map.mjs?v=093';
+import {recordPattern,TASK_REWARD} from './rules.mjs?v=093';
+import {applyItem,itemTargets} from './items.mjs?v=093';
 
 function patternRisk(g,p){
   if(g.excluded.has(p))return 0;
@@ -11,17 +11,17 @@ function routeValue(g,edge,hero=g.actor){
   const p=g.rooms[edge.to].pattern, task=recordPattern(g.history,p);
   const unexplored=[0,1,2,3].map(d=>neighbor(edge.to,d)).filter(id=>id!==null&&g.rooms[id].state==='covered');
   const occupied=g.heroes.filter(other=>other.id!==hero.id&&other.soul&&g.targets(other.id).some(target=>target.to===edge.to)).length;
-  return 2+(task.task?(g.fragments+taskReward(g.level)>=5?6:3.2):0)+unexplored.length*0.7+
+  return 2+(task.task?(g.fragments+TASK_REWARD>=5?6:3.2):0)+unexplored.length*0.7+
     new Set(unexplored.map(id=>g.rooms[id].pattern)).size*0.45-
     patternRisk(g,p)*(hero.soul<=2?2.3:1.5)-occupied*0.2;
 }
-function canYieldFragment(card){return card.success.some(f=>f.effect==='fragment')?1:card.monsterDraw?.tier==='III'?0.5:0;}
+function canYieldFragment(card){return card.success.some(f=>f.effect==='fragment')?1:card.monsterDraw?.tier==='IV'?0.75:card.monsterDraw?.tier==='III'?0.5:0;}
 function knownSlotScore(g,h,slot,pattern){
   const risk=patternRisk(g,pattern);
-  const rank=['I','II','III'].indexOf(slot.card.tier);
+  const rank=['I','II','III','IV'].indexOf(slot.card.tier);
   if(!slot.open)return 0.15-rank*0.38;
   const {card}=slot,match=h.specialty===card.attribute;
-  const burden=card.failure.reduce((n,fx)=>n+(fx.effect==='loseSoul'?(h.soul<=fx.amount?4:1.2)*fx.amount:fx.effect==='orientRoom'?0.5:fx.effect==='discardItem'?Math.min(h.hand.length,fx.amount)*0.45:0),0);
+  const burden=card.failure.reduce((n,fx)=>n+(fx.effect==='loseSoul'?(h.soul<=fx.amount?4:1.2)*fx.amount*(fx.target==='livingParty'?1.65:1):fx.effect==='orientRoom'?0.5:fx.effect==='discardItem'?Math.min(h.hand.length,fx.amount)*0.45:0),0);
   const fragment=canYieldFragment(card)*1.6;
   const difficulty=(card.dc-10)*0.16;
   const offer=card.offer;
@@ -43,7 +43,7 @@ function useBeforeEncounter(g){
     if(!options.length)continue;
     if(card.effect==='insight'&&g.slots.filter(s=>s&&!s.open).length>1&&
        (g.fragments>=3||ids.some(i=>g.heroes[i].soul<=2)||g.round===1)){
-      const unknown=options.map((o,i)=>({i,rank:['I','II','III'].indexOf(g.slots[o.arg].card.tier)})).sort((a,b)=>a.rank-b.rank)[0];
+      const unknown=options.map((o,i)=>({i,rank:['I','II','III','IV'].indexOf(g.slots[o.arg].card.tier)})).sort((a,b)=>a.rank-b.rank)[0];
       applyItem(g,id,card.uid,unknown.i);return true;
     }
     if(card.effect==='replaceEncounter'&&g.phase==='revealed'&&e.card.kind!=='交易'&&g.mode()<0&&
@@ -107,7 +107,7 @@ function cityPlan(g,style){
     const vulnerable=homes.filter(h=>g.targets(h.id).some(edge=>g.rooms[edge.to].pattern===p));
     const candidates=vulnerable.length?vulnerable:homes;
     const matches=candidates.filter(h=>h.specialty===card.attribute).length/(candidates.length||1);
-    const failure=card.failure.reduce((sum,fx)=>sum+({loseSoul:1.6,orientRoom:0.75,discardItem:0.9}[fx.effect]??0)*fx.amount,0);
+    const failure=card.failure.reduce((sum,fx)=>sum+({loseSoul:1.6,orientRoom:0.75,discardItem:0.9}[fx.effect]??0)*fx.amount*(fx.target==='livingParty'?1.6:1),0);
     return failure+(card.dc-9)*0.55-matches*1.6-canYieldFragment(card)*(style==='denial'?1.65:0.8);
   };
   const picks=g.hand.map((card,i)=>({i,score:weights(card)})).sort((a,b)=>b.score-a.score).slice(0,g.need).map(x=>x.i);

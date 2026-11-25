@@ -1,4 +1,4 @@
-import {ROLES} from './rules.mjs?v=092';
+import {ROLES} from './rules.mjs?v=093';
 
 const windows = {
   action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
@@ -16,6 +16,7 @@ export function itemTargets(g,id,item){
   if(fx==='transform')return ROLES.filter(r=>r!==h.specialty).map(r=>({arg:r,label:r}));
   if(fx==='replaceEncounter')return !e.replaced&&(g.events.length||g.eventDiscard.length)?[{label:'另抽一张'}]:[];
   if(fx==='substitute'){
+    if(e.damage?.area)return [];
     if(g.phase==='check'&&e.card.offer)return [];
     return e.party.flatMap(i=>g.heroes[i].soul&&i!==(e.damage?.target??e.bearer)?[{arg:i,label:g.heroes[i].name}]:[]);
   }
