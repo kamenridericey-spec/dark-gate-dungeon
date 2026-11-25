@@ -100,7 +100,7 @@ with sync_playwright() as manager:
             page.wait_for_timeout(100)
     assert action('deploy').count() or action('reset').count()
     merchant=browser.new_page(viewport={'width':1280,'height':800})
-    merchant.add_init_script('Date.now = () => 5')
+    merchant.add_init_script('Date.now = () => 21')
     merchant.on('pageerror',lambda err:errors.append(str(err)))
     page=merchant
     page.goto(BASE)

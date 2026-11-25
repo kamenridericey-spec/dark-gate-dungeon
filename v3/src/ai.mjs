@@ -1,6 +1,6 @@
-import {PATTERNS,frontiers,neighbor} from './map.mjs?v=091';
-import {recordPattern} from './rules.mjs?v=091';
-import {applyItem,itemTargets} from './items.mjs?v=091';
+import {PATTERNS,frontiers,neighbor} from './map.mjs?v=092';
+import {recordPattern,taskReward} from './rules.mjs?v=092';
+import {applyItem,itemTargets} from './items.mjs?v=092';
 
 function patternRisk(g,p){
   if(g.excluded.has(p))return 0;
@@ -11,20 +11,22 @@ function routeValue(g,edge,hero=g.actor){
   const p=g.rooms[edge.to].pattern, task=recordPattern(g.history,p);
   const unexplored=[0,1,2,3].map(d=>neighbor(edge.to,d)).filter(id=>id!==null&&g.rooms[id].state==='covered');
   const occupied=g.heroes.filter(other=>other.id!==hero.id&&other.soul&&g.targets(other.id).some(target=>target.to===edge.to)).length;
-  return 2+(task.task?(g.fragments===4?6:3.2):0)+unexplored.length*0.7+
+  return 2+(task.task?(g.fragments+taskReward(g.level)>=5?6:3.2):0)+unexplored.length*0.7+
     new Set(unexplored.map(id=>g.rooms[id].pattern)).size*0.45-
     patternRisk(g,p)*(hero.soul<=2?2.3:1.5)-occupied*0.2;
 }
+function canYieldFragment(card){return card.success.some(f=>f.effect==='fragment')?1:card.monsterDraw?.tier==='III'?0.5:0;}
 function knownSlotScore(g,h,slot,pattern){
   const risk=patternRisk(g,pattern);
   const rank=['I','II','III'].indexOf(slot.card.tier);
   if(!slot.open)return 0.15-rank*0.38;
   const {card}=slot,match=h.specialty===card.attribute;
   const burden=card.failure.reduce((n,fx)=>n+(fx.effect==='loseSoul'?(h.soul<=fx.amount?4:1.2)*fx.amount:fx.effect==='orientRoom'?0.5:fx.effect==='discardItem'?Math.min(h.hand.length,fx.amount)*0.45:0),0);
-  const fragment=card.success.some(f=>f.effect==='fragment')?1.6:card.kind==='战斗'?0.55:0;
+  const fragment=canYieldFragment(card)*1.6;
+  const difficulty=(card.dc-10)*0.16;
   const offer=card.offer;
   const canPay=!offer||(offer.cost.kind==='item'?h.hand.length>0:h.soul>offer.cost.amount);
-  return (match?1.1:0)-burden*(0.45+(match?-0.15:0.15)+risk*0.25)+fragment*(g.fragments===4?1.7:1)+(offer&&canPay&&h.specialty==='魅力'?0.35:0)-(canPay?0:1.25);
+  return (match?1.1:0)-difficulty-burden*(0.45+(match?-0.15:0.15)+risk*0.25)+fragment*(g.fragments===4?1.7:1)+(offer&&canPay&&h.specialty==='魅力'?0.35:0)-(canPay?0:1.25);
 }
 function bestAssignment(g,ids,pattern){
   const slots=g.slots.flatMap((slot,i)=>slot?[{slot,i}]:[]);
@@ -71,7 +73,7 @@ function useHelpfulItem(g){
     if(g.phase==='check'){
       if(['heal1','heal2'].includes(fx))idx=opts.findIndex(o=>o.arg===e.bearer&&g.buyer.soul<=2);
       if(fx==='healAll'&&e.party.some(i=>g.heroes[i].soul<=2))idx=0;
-      if(['reverse','reverseGuard','forceNormal','boost','boost2','boostGuard','battleBoost','crown'].includes(fx)&&g.mode()<0)idx=0;
+      if(['reverse','reverseGuard','forceNormal','boost','boost2','boostGuard','battleBoost','crown'].includes(fx)&&(g.mode()<0||(g.mode()===0&&e.card.dc>=11&&(['boost','boost2','boostGuard','battleBoost','crown'].includes(fx))&&(g.fragments>=3||e.card.failure.some(f=>f.effect==='loseSoul'&&f.amount>=g.buyer.soul)))))idx=0;
       const risk=e.card.failure.filter(f=>f.effect==='loseSoul').reduce((n,f)=>n+f.amount,0);
       if(['guard','guard2'].includes(fx)&&g.buyer.soul<=2&&risk>e.guard)idx=0;
       if(fx==='coffin'&&!e.coffin&&risk-e.guard>=g.buyer.soul)idx=0;
@@ -92,19 +94,33 @@ function useHelpfulItem(g){
   }
   return false;
 }
-export function aiStep(g,strategy='dynamic'){
+function cityPlan(g,style){
+  const reachableHeroes=g.heroes.filter(h=>h.soul>0&&g.targets(h.id).length);
+  const homes=reachableHeroes.length?reachableHeroes:g.heroes.filter(h=>h.soul>0);
+  const patterns=PATTERNS.map(pattern=>({
+    pattern, score:homes.reduce((sum,h)=>sum+g.targets(h.id)
+      .filter(f=>g.rooms[f.to].pattern===pattern)
+      .reduce((n,f)=>n+(1+(recordPattern(g.history,pattern).task?(style==='denial'?4:2.5):0))/(g.targets(h.id).length||1),0),0),
+  })).sort((a,b)=>b.score-a.score);
+  const p=patterns[0].pattern;
+  const weights=card=>{
+    const vulnerable=homes.filter(h=>g.targets(h.id).some(edge=>g.rooms[edge.to].pattern===p));
+    const candidates=vulnerable.length?vulnerable:homes;
+    const matches=candidates.filter(h=>h.specialty===card.attribute).length/(candidates.length||1);
+    const failure=card.failure.reduce((sum,fx)=>sum+({loseSoul:1.6,orientRoom:0.75,discardItem:0.9}[fx.effect]??0)*fx.amount,0);
+    return failure+(card.dc-9)*0.55-matches*1.6-canYieldFragment(card)*(style==='denial'?1.65:0.8);
+  };
+  const picks=g.hand.map((card,i)=>({i,score:weights(card)})).sort((a,b)=>b.score-a.score).slice(0,g.need).map(x=>x.i);
+  g.prepare(p,picks);
+}
+export function aiStep(g,strategy='dynamic',cityStrategy='pressure'){
   const e=g.encounter;
   if(g.side==='party'&&['check','rolled','damage'].includes(g.phase)&&useHelpfulItem(g))return;
   if(g.side==='party'&&['action','door','revealed'].includes(g.phase)&&useBeforeEncounter(g))return;
   switch(g.phase){
     case 'city':{
       if(g.canUpgrade){g.upgrade();break;}
-      const scores=PATTERNS.map(pattern=>({pattern,score:g.heroes.reduce((sum,h)=>sum+g.targets(h.id).filter(f=>g.rooms[f.to].pattern===pattern).reduce((total,f)=>total+1+(recordPattern(g.history,pattern).task?3:0),0),0)}));
-      scores.sort((a,b)=>b.score-a.score);
-      const favored=g.heroes.filter(h=>h.soul).map(h=>h.specialty);
-      const picks=g.hand.map((c,i)=>({i,score:c.failure.reduce((sum,fx)=>sum+({loseSoul:2,orientRoom:0.65,discardItem:1}[fx.effect]??0)*fx.amount,0)-favored.filter(a=>a===c.attribute).length*0.5-(c.success.some(f=>f.effect==='fragment')?0.5:0)}))
-        .sort((a,b)=>b.score-a.score).slice(0,g.need).map(p=>p.i);
-      g.prepare(scores[0].pattern,picks);break;
+      cityPlan(g,cityStrategy);break;
     }
     case 'action':{
       const h=g.actor,targets=g.slots.some(Boolean)?g.targets().sort((a,b)=>routeValue(g,b)-routeValue(g,a)):[];
@@ -119,10 +135,10 @@ export function aiStep(g,strategy='dynamic'){
       const solo=bestAssignment(g,[h.id],pattern);
       const groupChoice=bestAssignment(g,eligible,pattern);
       const recruit=groupChoice?.id===h.id?null:groupChoice?.id;
-      const group=strategy==='cautious'?eligible:[h.id];
-      if(strategy==='dynamic'&&recruit!==null&&recruit!==undefined&&groupChoice.score-solo.score>0.55&&
+      const group=[h.id];
+      if(strategy!=='aggressive'&&recruit!==null&&recruit!==undefined&&groupChoice.score-solo.score>0.55&&
          (h.soul<=2||!g.targets(recruit).some(edge=>edge.to!==target.to)))group.push(recruit);
-      if(strategy==='dynamic'&&group.length===1&&h.soul===1){
+      if(strategy!=='aggressive'&&group.length===1&&h.soul<=(strategy==='cautious'?2:1)){
         const support=eligible.find(i=>i!==h.id&&g.heroes[i].hand.some(c=>['heal1','heal2','healAll','substitute','guard2'].includes(c.effect)));
         if(support!==undefined)group.push(support);
       }

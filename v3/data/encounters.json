@@ -5,7 +5,7 @@
     "name": "断闸里的看守",
     "kind": "战斗",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "monsterReward",
@@ -32,7 +32,7 @@
     "name": "齿缝里的袭击",
     "kind": "战斗",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "monsterReward",
@@ -59,7 +59,7 @@
     "name": "石眼巡哨",
     "kind": "战斗",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "monsterReward",
@@ -86,7 +86,7 @@
     "name": "绳梁下的伏击",
     "kind": "战斗",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "monsterReward",
@@ -113,11 +113,11 @@
     "name": "轻重石板",
     "kind": "考验",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
-        "effect": "fragment",
-        "target": "party",
+        "effect": "drawItem",
+        "target": "bearer",
         "amount": 1
       }
     ],
@@ -136,7 +136,7 @@
     "name": "缺一齿的锁",
     "kind": "考验",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "drawItem",
@@ -170,11 +170,11 @@
     "name": "会应声的墙",
     "kind": "考验",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
-        "effect": "fragment",
-        "target": "party",
+        "effect": "drawItem",
+        "target": "bearer",
         "amount": 1
       }
     ],
@@ -193,7 +193,7 @@
     "name": "缓降井",
     "kind": "考验",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 8,
     "success": [
       {
         "effect": "heal",
@@ -216,7 +216,7 @@
     "name": "修灯人的摊",
     "kind": "交易",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 8,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -255,7 +255,7 @@
     "name": "搬货抵账",
     "kind": "交易",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 8,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -294,7 +294,7 @@
     "name": "废件估价台",
     "kind": "交易",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 8,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -333,7 +333,7 @@
     "name": "暗格小贩",
     "kind": "交易",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 8,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -515,6 +515,11 @@
     "attribute": "体魄",
     "dc": 10,
     "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
       {
         "effect": "drawItem",
         "target": "bearer",
@@ -765,7 +770,7 @@
     "name": "深井里的王冠",
     "kind": "战斗",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "monsterReward",
@@ -797,7 +802,7 @@
     "name": "棺室",
     "kind": "战斗",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "monsterReward",
@@ -824,7 +829,7 @@
     "name": "熄灯的长桌",
     "kind": "战斗",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "monsterReward",
@@ -856,7 +861,7 @@
     "name": "空壳回廊",
     "kind": "战斗",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "monsterReward",
@@ -888,7 +893,7 @@
     "name": "把手转到底",
     "kind": "考验",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "fragment",
@@ -911,7 +916,7 @@
     "name": "对称核室",
     "kind": "考验",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "fragment",
@@ -944,8 +949,13 @@
     "name": "唱反调的法庭",
     "kind": "考验",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 12,
     "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
       {
         "effect": "drawItem",
         "target": "bearer",
@@ -972,7 +982,7 @@
     "name": "最后一股井水",
     "kind": "考验",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 12,
     "success": [
       {
         "effect": "heal",
@@ -1000,7 +1010,7 @@
     "name": "失物总账",
     "kind": "交易",
     "attribute": "心智",
-    "dc": 10,
+    "dc": 12,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -1056,7 +1066,7 @@
     "name": "王室库存牌",
     "kind": "交易",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 12,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -1095,7 +1105,7 @@
     "name": "地下搬运行",
     "kind": "交易",
     "attribute": "体魄",
-    "dc": 10,
+    "dc": 12,
     "offer": {
       "timing": "afterCheck",
       "cost": {
@@ -1140,7 +1150,7 @@
     "name": "最后三件货",
     "kind": "交易",
     "attribute": "魅力",
-    "dc": 10,
+    "dc": 12,
     "offer": {
       "timing": "afterCheck",
       "cost": {

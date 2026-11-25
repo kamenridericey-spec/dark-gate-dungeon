@@ -1,7 +1,10 @@
-export const VERSION='0.9.1';
+export const VERSION='0.9.2';
 export const ROLES=['体魄','心智','魅力'];
 export const COSTS=[5,6,8];
+export const CITY_SOUL_LIMIT=8;
+export const MIN_TIER_III_ROUNDS=8;
 export const WIN_FRAGMENTS=5;
+export const taskReward=level=>level>=3?2:1;
 export const MAX_SOUL=[4,3,3];
 export const CAPACITY=[2,3,2];
 export const tier=level=>['I','II','III'][level-1];

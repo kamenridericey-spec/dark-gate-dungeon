@@ -1,5 +1,5 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=091';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName} from './rules.mjs?v=091';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=092';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,taskReward,CITY_SOUL_LIMIT,MIN_TIER_III_ROUNDS} from './rules.mjs?v=092';
 
 export class Game {
   constructor(data,seed=Date.now()){
@@ -11,7 +11,7 @@ export class Game {
     this.events=[]; this.eventDiscard=[]; this.goods=[]; this.goodsDiscard=[]; this.monsters={}; this.monsterDiscard={I:[],II:[],III:[]};
     this.pattern=null; this.revealed=false; this.excluded=new Set();
     this.hand=[]; this.slots=[null,null,null]; this.logs=[]; this.trace=[]; this.encounter=null;
-    this.metrics={rooms:0,checks:0,success:0,breaches:0,task:0,cardFragments:0,cityTurns:0,rotations:0,cityRotations:0,meaningfulCityRotations:0,trades:0,items:0,tradeOffers:0,tradeAccepted:0,group:0,income:{round:0,advantage:0,trade:0}};
+    this.metrics={firstFragmentRound:null,firstUpgradeRound:null,thirdTierRound:null,itemEffects:{},rooms:0,checks:0,success:0,breaches:0,task:0,cardFragments:0,cityTurns:0,rotations:0,cityRotations:0,meaningfulCityRotations:0,trades:0,items:0,tradeOffers:0,tradeAccepted:0,group:0,income:{round:0,advantage:0,trade:0}};
     this.unlock(1); this.hand=this.drawEvents(6);
     const startingItem=this.drawGoods(1)[0];
     if(startingItem) this.heroes[1].hand.push(startingItem);
@@ -26,7 +26,7 @@ export class Game {
     const key=tier(level), encounters=this.data.encounters.filter(c=>c.tier===key), goods=this.data.items.cards.filter(c=>c.tier===level), monsters=this.data.monsters[key];
     this.events=this.shuffle([...this.events,...encounters]); this.goods=this.shuffle([...this.goods,...goods.map(c=>this.unique(c))]);
     this.monsters[key]=this.shuffle(monsters);
-    if(level>1)this.note(`${key}级解锁：${encounters.length}张遭遇、${goods.length}张普通物资、${monsters.length}只怪物。`);
+    if(level>1)this.note(`${key}级解锁：${encounters.length}张遭遇（DC${encounters[0].dc}）、${goods.length}张普通物资、${monsters.length}只怪物。${level===3?'解锁怪物碎片，共鸣与巡礼奖励为2枚。':''}`);
   }
   draw(stack,discard,n,label){
     const cards=[];
@@ -43,32 +43,41 @@ export class Game {
   get actor(){return this.heroes[this.turn];}
   get buyer(){return this.heroes[this.encounter.bearer];}
   get need(){return this.slots.filter(s=>!s).length;}
-  get canUpgrade(){return this.phase==='city'&&!this.upgraded&&this.citySoul>=COSTS[this.level-1];}
+  get tierIIIWait(){return this.level===3&&this.metrics.thirdTierRound!==null?Math.max(0,MIN_TIER_III_ROUNDS-(this.round-this.metrics.thirdTierRound)):0;}
+  get canUpgrade(){return this.phase==='city'&&!this.upgraded&&this.citySoul>=COSTS[this.level-1]&&this.tierIIIWait===0;}
+  get mustUpgrade(){return this.canUpgrade&&this.level<3&&this.upgradeDue===this.level;}
   upgrade(){
     this.assert(this.canUpgrade,'当前不能升级');
-    this.citySoul-=COSTS[this.level-1];this.upgraded=true;this.level++;
+    this.citySoul-=COSTS[this.level-1];this.upgraded=true;this.upgradeDue=null;this.level++;
+    if(this.level===2)this.metrics.firstUpgradeRound=this.round;
+    if(this.level===3)this.metrics.thirdTierRound=this.round;
     this.note(`城主升至${tier(this.level)??'IV'}级。`);
     if(this.level===4){this.end('城主','升至 IV 级');return;}
     this.unlock(this.level);
-    const extra=this.drawEvents(1)[0];
+    const newTierIndex=this.events.findIndex(card=>card.tier===tier(this.level));
+    const extra=newTierIndex<0?undefined:this.events.splice(newTierIndex,1)[0];
     if(!extra)return;
-    this.hand.push(extra); this.note('升级额外摸 1 张遭遇。');
+    this.hand.push(extra); this.note('升级额外摸 1 张新等级遭遇。');
     if(this.hand.length>6)this.choose('升级换牌','city',this.hand.map(c=>({label:c.name,card:c})),i=>{
       this.events.push(this.hand.splice(i,1)[0]); this.phase='city';
     });
   }
   prepare(pattern,indices){
     this.assert(this.phase==='city'&&PATTERNS.includes(pattern),'请选择机关纹样');
+    this.assert(!this.mustUpgrade,'上轮已延后开门，本轮须先升级迷宫');
     const amount=Math.min(this.need,this.hand.length);
     this.assert(indices.length===amount&&new Set(indices).size===amount&&indices.every(i=>this.hand[i]),'请选择足量且不同的遭遇');
+    if(this.level<3&&this.canUpgrade){this.upgradeDue=this.level;this.note('本轮已延后升级，下个城主回合须解锁新等级。');}
     for(const i of indices)this.slots[this.slots.indexOf(null)]={card:this.hand[i],open:false};
     this.hand=this.hand.filter((_,i)=>!indices.includes(i));
     this.pattern=pattern;this.revealed=false;this.excluded=new Set();this.metrics.cityTurns++;
     this.phase='action';this.turn=0;this.note('城主已布置遭遇，机关已暗置。');
   }
   income(kind){
+    const source={round:'大轮结束',advantage:'城主优势',trade:'实际成交'}[kind];
+    if(this.citySoul>=CITY_SOUL_LIMIT){this.note(`城主魂已满 · ${source}`);return;}
     this.citySoul++;this.metrics.income[kind]++;
-    this.note(`城主 +1 魂 · ${{round:'大轮结束',advantage:'城主优势',trade:'实际成交'}[kind]}`);
+    this.note(`城主 +1 魂 · ${source}`);
   }
   nextTurn(){
     if(this.winner)return;
@@ -268,6 +277,8 @@ export class Game {
     if(options.length===1)selectPayment(0);else this.choose('选择付款物','party',options,selectPayment);
   }
   addFragment(n,source){
+    if(!this.fragments)this.metrics.firstFragmentRound=this.round;
+    n=Math.min(n,WIN_FRAGMENTS-this.fragments);
     this.fragments+=n;if(source==='共鸣'||source==='巡礼')this.metrics.task+=n;else this.metrics.cardFragments+=n;
     this.note(`+${n} 碎片 · ${source}（${this.fragments}/${WIN_FRAGMENTS}）`);
     if(this.fragments>=WIN_FRAGMENTS)this.end('冒险者','集齐五枚碎片');
@@ -278,7 +289,7 @@ export class Game {
     if(e.success&&(!e.card.offer||e.traded)){
       const next=recordPattern(this.history,this.rooms[e.to].pattern);this.history=next.history;
       this.note(`任务记录：${this.history.join(' · ')||'清空'}。`);
-      if(next.task)this.addFragment(1,next.task);
+      if(next.task)this.addFragment(taskReward(this.level),next.task);
     }
     if(this.winner)return;
     if(e.mode===-1)this.income('advantage');if(e.traded)this.income('trade');

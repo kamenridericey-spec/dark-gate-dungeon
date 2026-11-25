@@ -32,7 +32,7 @@ test('zero rooms used preserves all slots without drawing gratuitous cards',()=>
 });
 test('upgrade unlocks encounter/goods/monsters and draws exactly one',()=>{
   const g=fresh();g.hand.pop();g.citySoul=5;g.upgrade();
-  assert.equal(g.level,2);assert.equal(g.monsters.II.length,4);assert.equal(g.hand.length,6);
+  assert.equal(g.level,2);assert.equal(g.monsters.II.length,4);assert.equal(g.hand.length,6);assert.equal(g.hand.at(-1).tier,'II');
   assert.ok(g.logs.some(l=>l.text.includes('12张遭遇')));
   const full=fresh();full.citySoul=5;full.upgrade();assert.equal(full.phase,'choice');full.select(6);assert.equal(full.hand.length,6);
 });
@@ -50,10 +50,17 @@ test('shared task window switches route and triggers both patterns',()=>{
   assert.deepEqual(recordPattern(['A','A'],'A'),{history:[],task:'共鸣'});
   assert.deepEqual(recordPattern(['A','B'],'C'),{history:[],task:'巡礼'});
 });
-test('same tier monster grants unique reward and stops on fragment victory',()=>{
-  const g=fresh();g.level=3;g.fragments=4;const e=setup(g,'D-I-01');
-  g.monsters.I.unshift(data.monsters.I.find(m=>m.reward.effect==='fragment'));
-  g.monsterDiscard.I.push(e.monster);e.monster=g.drawMonster('I');
+test('I and II monsters pay no fragments, and old battles keep their own tier at III',()=>{
+  for(const rank of ['I','II'])assert.ok(data.monsters[rank].every(m=>m.reward.effect==='monsterLoot'));
+  assert.ok(data.encounters.filter(c=>c.tier==='I').every(c=>c.success.every(e=>e.effect!=='fragment')));
+  const g=fresh();g.level=3;g.unlock(3);const e=setup(g,'D-I-01');
+  assert.ok(g.data.monsters.I.some(m=>m.id===e.monster.id));
+  assert.equal(e.monster.reward.effect,'monsterLoot');
+});
+test('III monster grants one reward and stops immediately on fifth fragment',()=>{
+  const g=fresh();g.level=3;g.unlock(3);g.fragments=4;
+  g.monsters.III.unshift(data.monsters.III.find(m=>m.reward.effect==='fragment'));
+  const e=setup(g,'D-III-01');
   assert.equal(e.monster.reward.effect,'fragment');g.startCheck();complete(g,20);
   assert.equal(g.winner,'冒险者');assert.equal(g.rooms[e.to].state,'pending');assert.deepEqual(g.metrics.income,{round:0,advantage:0,trade:0});
 });
@@ -143,4 +150,31 @@ test('breaching does not change a printed door layout',()=>{
   assert.deepEqual(g.rooms[g.start].doors,[]);
   assert.deepEqual(g.rooms[g.start].breachDoors,[edge.d]);
   assert.ok(connected(g.rooms,g.start,edge.d));
+});
+
+test('late tasks pay two fragments and retain a five-fragment display cap',()=>{
+  const g=fresh();g.level=3;g.unlock(3);g.fragments=3;
+  const e=setup(g,'D-I-06');const pattern=g.rooms[e.to].pattern;
+  g.history=[pattern,pattern];complete(g,20);finish(g);
+  assert.equal(g.metrics.task,2);assert.equal(g.fragments,5);assert.equal(g.winner,'冒险者');
+  const early=fresh();const opening=setup(early,'D-I-06');const p=early.rooms[opening.to].pattern;
+  early.history=[p,p];complete(early,20);finish(early);assert.equal(early.fragments,1);
+});
+test('city eight-soul cap and eight full rounds at III gate the final upgrade',()=>{
+  const g=fresh();g.level=3;g.metrics.thirdTierRound=2;g.round=9;g.citySoul=7;
+  g.income('round');g.income('trade');g.income('advantage');
+  assert.equal(g.citySoul,8);assert.equal(g.tierIIIWait,1);assert.equal(g.canUpgrade,false);
+  g.round=10;assert.equal(g.canUpgrade,true);g.upgrade();assert.equal(g.winner,'城主');
+});
+test('a skipped II or III upgrade locks the next deployment until upgrade',()=>{
+  const g=fresh();g.citySoul=5;g.prepare('条纹',[0,1,2]);
+  for(let i=0;i<3;i++)g.wait();
+  assert.ok(g.mustUpgrade);assert.throws(()=>g.prepare('条纹',[]),/须先升级/);
+  g.upgrade();assert.equal(g.level,2);assert.equal(g.mustUpgrade,false);g.prepare('条纹',[]);
+});
+test('encounter DC values depend on their card tier',()=>{
+  for(const [key,dc] of Object.entries({I:8,II:10,III:12})){
+    const cards=data.encounters.filter(c=>c.tier===key);
+    assert.equal(cards.length,12); assert.ok(cards.every(c=>c.dc===dc));
+  }
 });

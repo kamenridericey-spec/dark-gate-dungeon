@@ -15,18 +15,22 @@
       "id": "MON-I-02",
       "name": "反穿蜥",
       "reward": {
-        "effect": "fragment",
-        "target": "party",
-        "amount": 1
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "反穿的鳞片",
+        "lootRef": "MON-I-02"
       }
     },
     {
       "id": "MON-I-03",
       "name": "报丧眼",
       "reward": {
-        "effect": "fragment",
-        "target": "party",
-        "amount": 1
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "唱反调的眼球",
+        "lootRef": "MON-I-03"
       }
     },
     {
@@ -68,18 +72,22 @@
       "id": "MON-II-03",
       "name": "假面鹿",
       "reward": {
-        "effect": "fragment",
-        "target": "party",
-        "amount": 1
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "不合脸的面具",
+        "lootRef": "MON-II-03"
       }
     },
     {
       "id": "MON-II-04",
       "name": "吞屑貘",
       "reward": {
-        "effect": "fragment",
-        "target": "party",
-        "amount": 1
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "吞屑貘的铜牙",
+        "lootRef": "MON-II-04"
       }
     }
   ],

@@ -1,4 +1,4 @@
-import {ROLES} from './rules.mjs?v=091';
+import {ROLES} from './rules.mjs?v=092';
 
 const windows = {
   action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
@@ -62,5 +62,6 @@ export function applyItem(g,id,uid,index){
     default:throw new Error('未知道具效果');
   }
   h.hand.splice(h.hand.indexOf(item),1);g.discard(item);g.metrics.items++;
+  g.metrics.itemEffects[item.effect]=(g.metrics.itemEffects[item.effect]??0)+1;
   g.note(`${h.name} 使用「${item.name}」。`);
 }

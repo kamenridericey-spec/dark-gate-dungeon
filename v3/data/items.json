@@ -491,6 +491,16 @@
       "inventoryType": "unified",
       "tier": 3,
       "id": "MON-III-03"
+    },
+    "MON-II-04": {
+      "id": "MON-II-04",
+      "name": "吞屑貘的铜牙",
+      "tier": 2,
+      "effect": "guard2",
+      "windows": [
+        "检定前"
+      ],
+      "text": "这场遭遇抵挡接下来至多2点失魂。"
     }
   }
 }
