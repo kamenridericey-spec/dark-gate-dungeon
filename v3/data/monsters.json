@@ -1,0 +1,128 @@
+{
+  "I": [
+    {
+      "id": "MON-I-01",
+      "name": "打嗝蛙",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "会打嗝的胃囊",
+        "lootRef": "MON-I-01"
+      }
+    },
+    {
+      "id": "MON-I-02",
+      "name": "反穿蜥",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-I-03",
+      "name": "报丧眼",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-I-04",
+      "name": "借手虫",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "借来的第三只手",
+        "lootRef": "MON-I-04"
+      }
+    }
+  ],
+  "II": [
+    {
+      "id": "MON-II-01",
+      "name": "弹簧鱿",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "弹簧触须",
+        "lootRef": "MON-II-01"
+      }
+    },
+    {
+      "id": "MON-II-02",
+      "name": "灯笼胃",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "肚里的小太阳",
+        "lootRef": "MON-II-02"
+      }
+    },
+    {
+      "id": "MON-II-03",
+      "name": "假面鹿",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-II-04",
+      "name": "吞屑貘",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    }
+  ],
+  "III": [
+    {
+      "id": "MON-III-01",
+      "name": "王冠水母",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    },
+    {
+      "id": "MON-III-02",
+      "name": "棺材螺",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "随身小棺材",
+        "lootRef": "MON-III-02"
+      }
+    },
+    {
+      "id": "MON-III-03",
+      "name": "吞灯兽",
+      "reward": {
+        "effect": "monsterLoot",
+        "target": "bearer",
+        "amount": 1,
+        "loot": "嚼不烂的灯芯",
+        "lootRef": "MON-III-03"
+      }
+    },
+    {
+      "id": "MON-III-04",
+      "name": "无面铸像",
+      "reward": {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    }
+  ]
+}
