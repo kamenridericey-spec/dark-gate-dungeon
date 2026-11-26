@@ -1,0 +1,1615 @@
+[
+  {
+    "id": "D-I-01",
+    "tier": "I",
+    "name": "断闸里的看守",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "I",
+      "count": 1
+    },
+    "scene": "断闸的锯齿来回扫动，守卫趁你抬闸时逼近。"
+  },
+  {
+    "id": "D-I-02",
+    "tier": "I",
+    "name": "齿缝里的袭击",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "I",
+      "count": 1
+    },
+    "scene": "墙缝里窜出伏击者，乱战可能撞歪门轴。"
+  },
+  {
+    "id": "D-I-03",
+    "tier": "I",
+    "name": "石眼巡哨",
+    "kind": "战斗",
+    "attribute": "魅力",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "I",
+      "count": 1
+    },
+    "scene": "石眼跟着声音转动。等它分神，你才有机会出手。"
+  },
+  {
+    "id": "D-I-04",
+    "tier": "I",
+    "name": "绳梁下的伏击",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "I",
+      "count": 1
+    },
+    "scene": "头顶的绳索突然收紧，你得护住背包再反击。"
+  },
+  {
+    "id": "D-I-05",
+    "tier": "I",
+    "name": "轻重石板",
+    "kind": "考验",
+    "attribute": "体魄",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "踩对两块配重石板，暗格才会打开。"
+  },
+  {
+    "id": "D-I-06",
+    "tier": "I",
+    "name": "缺一齿的锁",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "锁缺了一齿，旁边还留着一道可借力的槽口。",
+    "preferredPattern": "条纹",
+    "patternEffect": {
+      "when": "success",
+      "effects": [
+        {
+          "effect": "heal",
+          "target": "bearer",
+          "amount": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "D-I-07",
+    "tier": "I",
+    "name": "会应声的墙",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "墙会复述你的话，只有让它答错，暗格才会弹开。"
+  },
+  {
+    "id": "D-I-08",
+    "tier": "I",
+    "name": "缓降井",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 7,
+    "success": [
+      {
+        "effect": "heal",
+        "target": "explorers",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "井壁上有一圈可供歇脚的石台，下去比上来难。"
+  },
+  {
+    "id": "D-I-09",
+    "tier": "I",
+    "name": "修灯人的摊",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 7,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "none",
+        "target": "none",
+        "amount": 0
+      }
+    ],
+    "scene": "修灯人点亮货架，愿意让你先看存货。"
+  },
+  {
+    "id": "D-I-10",
+    "tier": "I",
+    "name": "搬货抵账",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 7,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "商贩收旧件，但货箱堵着门轴，搬岔了就得由他重排。"
+  },
+  {
+    "id": "D-I-11",
+    "tier": "I",
+    "name": "废件估价台",
+    "kind": "交易",
+    "attribute": "心智",
+    "dc": 7,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "none",
+        "target": "none",
+        "amount": 0
+      }
+    ],
+    "scene": "估价师拿小锤逐一敲过旧件，再决定收不收。"
+  },
+  {
+    "id": "D-I-12",
+    "tier": "I",
+    "name": "暗格小贩",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 7,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "小贩拉开暗格，柜台下的夹具卡住了你的包扣。"
+  },
+  {
+    "id": "D-II-01",
+    "tier": "II",
+    "name": "上弦的警钟",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "II",
+      "count": 1
+    },
+    "scene": "警钟一响，守卫冲出，墙内的转轴也开始转动。"
+  },
+  {
+    "id": "D-II-02",
+    "tier": "II",
+    "name": "倒挂的灯笼",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "splitExplorers"
+      }
+    ],
+    "monsterDraw": {
+      "tier": "II",
+      "count": 1
+    },
+    "scene": "两根灯架同时倒下。一人可以顶住两根，同行也能各托一根。"
+  },
+  {
+    "id": "D-II-03",
+    "tier": "II",
+    "name": "假面岔口",
+    "kind": "战斗",
+    "attribute": "魅力",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "monsterDraw": {
+      "tier": "II",
+      "count": 1
+    },
+    "scene": "挂满假面的岔口里，伏击者模仿同伴说话。"
+  },
+  {
+    "id": "D-II-04",
+    "tier": "II",
+    "name": "弹簧缸里的巢",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "bearer"
+      },
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "II",
+      "count": 1
+    },
+    "scene": "弹簧夹比先前绷得更紧。一旦失手，来不及护住自己和背包。"
+  },
+  {
+    "id": "D-II-05",
+    "tier": "II",
+    "name": "逆齿传动室",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "顺转会锁死出口，只有倒转齿轮才够得着碎片。"
+  },
+  {
+    "id": "D-II-06",
+    "tier": "II",
+    "name": "双闸配重",
+    "kind": "考验",
+    "attribute": "体魄",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "两道闸共用一组配重，同时升起才看得见储物格。",
+    "preferredPattern": "方格",
+    "patternEffect": {
+      "when": "failure",
+      "effects": [
+        {
+          "effect": "orientRoom",
+          "target": "city",
+          "amount": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "D-II-07",
+    "tier": "II",
+    "name": "回声合唱台",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "heal",
+        "target": "explorers",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "对上合声，石台会停稳；唱错时，门架仍然在转。"
+  },
+  {
+    "id": "D-II-08",
+    "tier": "II",
+    "name": "不对称的走马灯",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 9,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "光轮投出不对称的缺口，伸手取物只有一个间隙。"
+  },
+  {
+    "id": "D-II-09",
+    "tier": "II",
+    "name": "柜台后的两杆秤",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 9,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "商贩把交货与开门接在同一根拉杆上。"
+  },
+  {
+    "id": "D-II-10",
+    "tier": "II",
+    "name": "铁砧旁的寄售",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 9,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "none",
+        "target": "none",
+        "amount": 0
+      }
+    ],
+    "scene": "寄售的货摆在余温未散的铁砧旁。"
+  },
+  {
+    "id": "D-II-11",
+    "tier": "II",
+    "name": "倒刻价签",
+    "kind": "交易",
+    "attribute": "心智",
+    "dc": 9,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "价签全是倒写的。错读价签会踩下柜台前的压板。"
+  },
+  {
+    "id": "D-II-12",
+    "tier": "II",
+    "name": "回声诊所",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 9,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "heal",
+          "target": "bearer",
+          "amount": 1
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "none",
+        "target": "none",
+        "amount": 0
+      }
+    ],
+    "scene": "诊所把轻伤处理和挑选一件补给写在同一份报价上。"
+  },
+  {
+    "id": "D-III-01",
+    "tier": "III",
+    "name": "深井里的王冠",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "III",
+      "count": 1
+    },
+    "scene": "王冠悬在深井上方，伏击者守着转动的井架。"
+  },
+  {
+    "id": "D-III-02",
+    "tier": "III",
+    "name": "棺室",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "monsterDraw": {
+      "tier": "III",
+      "count": 1
+    },
+    "scene": "棺盖一响，你必须在窄室里挡住扑来的怪物。"
+  },
+  {
+    "id": "D-III-03",
+    "tier": "III",
+    "name": "熄灯的长桌",
+    "kind": "战斗",
+    "attribute": "魅力",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "splitExplorers"
+      },
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "III",
+      "count": 1
+    },
+    "scene": "灯一熄灭，长桌两边同时有人拉扯。同行可以一人堵住一边。"
+  },
+  {
+    "id": "D-III-04",
+    "tier": "III",
+    "name": "空壳回廊",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "III",
+      "count": 1
+    },
+    "scene": "空壳散落在转轴四周，失手时连下一扇门都可能被带偏。"
+  },
+  {
+    "id": "D-III-05",
+    "tier": "III",
+    "name": "把手转到底",
+    "kind": "考验",
+    "attribute": "体魄",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "scene": "把手转到底就能开箱，但回弹足以打伤人。"
+  },
+  {
+    "id": "D-III-06",
+    "tier": "III",
+    "name": "对称核室",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "bearer"
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "核心落下时会带偏门轮。要取碎片，得先把自己从井口拉开。"
+  },
+  {
+    "id": "D-III-07",
+    "tier": "III",
+    "name": "唱反调的法庭",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 2
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "法庭要求交出物证，答不上来，随身物也会被扣作证物。"
+  },
+  {
+    "id": "D-III-08",
+    "tier": "III",
+    "name": "最后一股井水",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 11,
+    "success": [
+      {
+        "effect": "heal",
+        "target": "explorers",
+        "amount": 1
+      },
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "splitExplorers"
+      }
+    ],
+    "scene": "泉水冲开两块石板。独行要硬顶两次，同行可以一人挡一块。"
+  },
+  {
+    "id": "D-III-09",
+    "tier": "III",
+    "name": "失物总账",
+    "kind": "交易",
+    "attribute": "心智",
+    "dc": 11,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "heal",
+          "target": "bearer",
+          "amount": 1
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "账房愿意拿货换旧件，还会替成交的人处理伤口。",
+    "preferredPattern": "点阵",
+    "patternEffect": {
+      "when": "afterTrade",
+      "effects": [
+        {
+          "effect": "drawItem",
+          "target": "bearer",
+          "amount": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "D-III-10",
+    "tier": "III",
+    "name": "王室库存牌",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 11,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "scene": "封库存货摆在门边，开错锁会触发压板。"
+  },
+  {
+    "id": "D-III-11",
+    "tier": "III",
+    "name": "地下搬运行",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 11,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "drawItem",
+          "target": "bearer",
+          "amount": 1
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "scene": "搬运行愿意以旧换新，成交还附一件打包货。"
+  },
+  {
+    "id": "D-III-12",
+    "tier": "III",
+    "name": "最后三件货",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 11,
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    },
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "scene": "价单上只剩三件。柜台的落锁与地板转轴连在一起。"
+  },
+  {
+    "id": "IV-01",
+    "tier": "IV",
+    "name": "震荡门闸",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 13,
+    "scene": "铁闸擦着地面倒转，守卫扑向最先跨门的人。",
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "explorers",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "IV",
+      "count": 1
+    }
+  },
+  {
+    "id": "IV-02",
+    "tier": "IV",
+    "name": "无声护卫",
+    "kind": "战斗",
+    "attribute": "心智",
+    "dc": 13,
+    "scene": "两面镜子同时照到你的手，守卫顺着镜影迎面撞来。",
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 2,
+        "target": "bearer"
+      },
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "IV",
+      "count": 1
+    }
+  },
+  {
+    "id": "IV-03",
+    "tier": "IV",
+    "name": "最后的守门人",
+    "kind": "战斗",
+    "attribute": "魅力",
+    "dc": 13,
+    "scene": "守门人要求来者自报姓名，然后才举起长柄锁。",
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "monsterDraw": {
+      "tier": "IV",
+      "count": 1
+    }
+  },
+  {
+    "id": "IV-04",
+    "tier": "IV",
+    "name": "断链后的脚步",
+    "kind": "战斗",
+    "attribute": "体魄",
+    "dc": 13,
+    "scene": "链条折断，脚步从门边逼近。出口机关也开始松动。",
+    "success": [
+      {
+        "effect": "monsterReward",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 2
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "monsterDraw": {
+      "tier": "IV",
+      "count": 1
+    }
+  },
+  {
+    "id": "IV-05",
+    "tier": "IV",
+    "name": "悬空的炉心",
+    "kind": "考验",
+    "attribute": "体魄",
+    "dc": 13,
+    "scene": "碎片卡在炉心下。托住倾斜铁盘就能把它取出。",
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "livingParty",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": "IV-06",
+    "tier": "IV",
+    "name": "轮轴的盲点",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 13,
+    "scene": "三段刻线只有一处相合。转错轮轴会带偏门向。",
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": "IV-07",
+    "tier": "IV",
+    "name": "留声法庭",
+    "kind": "考验",
+    "attribute": "魅力",
+    "dc": 13,
+    "scene": "法庭扣押证物。答错时，鸣响还会沿各处门轴传遍全场。",
+    "success": [
+      {
+        "effect": "fragment",
+        "target": "party",
+        "amount": 1
+      },
+      {
+        "effect": "heal",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "amount": 1,
+        "target": "livingParty"
+      },
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "id": "IV-08",
+    "tier": "IV",
+    "name": "备用闸室",
+    "kind": "考验",
+    "attribute": "心智",
+    "dc": 13,
+    "scene": "隔墙里藏着维护槽，必须卡住挡板才能靠近。",
+    "success": [
+      {
+        "effect": "drawItem",
+        "target": "bearer",
+        "amount": 2
+      },
+      {
+        "effect": "heal",
+        "target": "explorers",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "id": "IV-09",
+    "tier": "IV",
+    "name": "熄炉前的交换",
+    "kind": "交易",
+    "attribute": "体魄",
+    "dc": 13,
+    "scene": "工匠愿意拿货换旧件，还会替买家处理烧伤。",
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "heal",
+          "target": "bearer",
+          "amount": 2
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    }
+  },
+  {
+    "id": "IV-10",
+    "tier": "IV",
+    "name": "封库人的价单",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 13,
+    "scene": "库门只开片刻。买家取货时会收到一份封好的随货补给。",
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "drawItem",
+          "target": "bearer",
+          "amount": 1
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    }
+  },
+  {
+    "id": "IV-11",
+    "tier": "IV",
+    "name": "旧钥匙收购所",
+    "kind": "交易",
+    "attribute": "心智",
+    "dc": 13,
+    "scene": "估价台只认对得上齿痕的旧件，认错就会夹住随身物。",
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "discardItem",
+        "target": "bearer",
+        "amount": 2
+      }
+    ],
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "item",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    }
+  },
+  {
+    "id": "IV-12",
+    "tier": "IV",
+    "name": "门后的访客",
+    "kind": "交易",
+    "attribute": "魅力",
+    "dc": 13,
+    "scene": "来客离开前愿意替成交者的同行小队处理伤口。",
+    "success": [
+      {
+        "effect": "completeOffer",
+        "target": "bearer",
+        "amount": 1
+      }
+    ],
+    "failure": [
+      {
+        "effect": "loseSoul",
+        "target": "bearer",
+        "amount": 1
+      },
+      {
+        "effect": "orientRoom",
+        "target": "city",
+        "amount": 1
+      }
+    ],
+    "offer": {
+      "timing": "afterCheck",
+      "cost": {
+        "kind": "soul",
+        "target": "bearer",
+        "amount": 1
+      },
+      "take": 1,
+      "afterTrade": [
+        {
+          "effect": "heal",
+          "target": "explorers",
+          "amount": 1
+        }
+      ],
+      "revealByResult": {
+        "success": 2,
+        "failure": 1
+      },
+      "charmExtraReveal": 1,
+      "paymentOptional": true
+    }
+  }
+]
