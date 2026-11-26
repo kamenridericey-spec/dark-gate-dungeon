@@ -1,6 +1,7 @@
 import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs';
 import {applyItem,itemTargets} from './items.mjs?v=093';
 import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?v=093';
+import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs';
 import {diceMarkup,animateDice} from './dice.mjs?v=093';
 import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?v=093';
 
@@ -29,7 +30,7 @@ function describeEffect(effect){
 }
 const effectsRow=(list)=>list?.map(describeEffect).join('')||badge('—','无额外效果');
 const price=offer=>offer.cost.kind==='soul'?`${icon('♥','支付一魂')} 1`:`${icon('▣','交付一件持有物')} 1`;
-let actionKey='', game, data, human='party', hidden=false, cover='', tool=null, selected=new Set(), dest=null, cityPicks=new Set(), cityPattern=null, timer=null, aiRun=0, feedback=null, aiRecords=[], aiDice=null, diceBusy=false, skipFeedback=false;
+let actionKey='', game, data, human='party', hidden=false, cover='', tool=null, selected=new Set(), dest=null, cityPicks=new Set(), cityPattern=null, timer=null, aiRun=0, feedback=null, aiRecords=[], aiDice=null, diceBusy=false, skipFeedback=false, orientationDraft=null, animateTile=false, observedMonster=null;
 const showMenu=()=>modal('暗门地牢',`<div class="start-picks">${button(icon('▲','冒险者')+'<strong>冒险者</strong><small>带三名角色探索</small>','choose-side','party',human==='party'?'picked':'')}${button(icon('♜','城主')+'<strong>城主</strong><small>部署遭遇与机关</small>','choose-side','city',human==='city'?'picked':'')}</div>`,button('开始对局','start','','primary'),false,'七张生存压力遭遇 · 另一方自动行动');
 function modal(title,body,buttons='',fold=true,kicker=''){
   return `<div class="scrim"><section class="modal" role="dialog" aria-modal="true" aria-label="${escape(title)}">${fold?button('⌄','hide','','fold',false,'收起，查看地图'):''}${kicker?`<div class="kicker">${escape(kicker)}</div>`:''}<h1>${escape(title)}</h1>${body}${buttons?`<div class="modal-actions">${buttons}</div>`:''}</section></div>`;
@@ -52,6 +53,14 @@ function itemCard(c,act='',value='',disabled=false){
   <small>${c.monster?'素材':'物资'}</small><h2>${escape(c.name)}</h2><div class="card-type">${icon(c.monster?'✶':'▣',c.monster?'怪物素材':'普通物资')}</div>
   <p>${escape(c.text)}</p><footer>${escape((c.windows??[c.timing]).join(' · '))}</footer></article>`;
 }
+const monsterArt=monster=>'<svg viewBox="0 0 60 60" aria-hidden="true"><path d="'+monsterMark(monster.id)+'"/></svg>';
+function monsterPacket(card,monster,compact=false){
+  if(!monster)return '';
+  const reward=monster.reward,item=data.items.loot[reward.lootRef];
+  if(compact===true)return '<div class="monster-brief">'+monsterArt(monster)+' <strong>'+escape(monster.name)+'</strong> · '+card.tier+' 级 · '+escape(item?item.name:'碎片 '+reward.amount)+'</div>';
+  const portrait='<article class="card monster-portrait"><small>'+card.tier+' 级怪物</small><h2>'+escape(monster.name)+'</h2><div class="monster-sigil">'+monsterArt(monster)+'</div><div class="outcome good"><span>击败后</span>'+(item?badge('素材','领取右侧配对素材'):describeEffect(reward))+'</div></article>';
+  return '<div class="monster-docket">'+(compact==='observed'?'':encounterCard(card))+portrait+(item?itemCard({...item,monster:true}):'')+'</div>';
+}
 const cardRow=content=>`<div class="cards">${content}</div>`;
 function upgradeLabel(g){
   const cost=COSTS[g.level-1];
@@ -60,10 +69,24 @@ function upgradeLabel(g){
   return `升级迷宫 · ${g.citySoul}/${cost} 魂`;
 }
 const upgradeTip=()=>`城主最多持有 ${CITY_SOUL_LIMIT} 魂。准备阶段每轮可升一级，升 ${tier(CITY_WIN_LEVEL)} 即获胜。首次够魂升 II 或 III 可以延后一轮。`;
+function drawObjectives(g){
+  const hint=taskHint(g.history,PATTERNS);
+  const crystals=Array.from({length:5},(_,i)=>'<span class="crystal '+(i<g.fragments?'filled':'')+'" aria-hidden="true">◆</span>').join('');
+  const marks=[0,1].map(i=>g.history[i]?pattern(g.history[i]):'<span class="swatch empty-mark" aria-label="未记录">·</span>').join('');
+  const next=hint.needed.map(p=>'<span class="last-mark">'+pattern(p)+'</span>').join('');
+  const last=g.logs.findLast(l=>/碎片 · (共鸣|巡礼)/.test(l.text));
+  $('objective-rack').innerHTML=
+    '<div class="fragment-bank" title="集齐五枚碎片获胜"><div class="objective-title">冒险者碎片 <strong>'+g.fragments+'/5</strong></div><div class="crystals">'+crystals+'</div></div>'+
+    '<div class="task-track" title="连续三个同纹完成共鸣，三个不同纹完成巡礼。只记录成功探索；交易还必须成交。">'+
+    '<div class="objective-title"><span class="map-meter" title="已进入房间数，不计入口">探索 '+g.metrics.rooms+'/35</span>共鸣 / 巡礼'+(last?' <span class="task-note">· 第 '+last.round+' 轮完成'+(last.text.includes('共鸣')?'共鸣':'巡礼')+'</span>':'')+'</div>'+
+    '<div class="history-line">'+marks+(next?'<span class="task-progress">→ '+next+' <b>◆ +1</b></span>':'<span class="swatch empty-mark" aria-label="待记录">·</span>')+
+    '<span class="task-note">'+hint.label+'</span></div></div>';
+}
 function updateBoard(){
   const g=game;
   $('table').classList.toggle('pre-game',!g);
-  if(!g)return;
+  $('objective-rack').hidden=!g;
+  if(!g){for(const key of ['city','heroes','map','controls','signal','objective-rack'])$(key).innerHTML='';return;}
   $('city').innerHTML=`<div class="panel"><div class="section-title">${icon('♜','城主')} 城主 <span>${tier(g.level)}</span></div>
     <div class="stats">${badge(icon('♥','城主魂')+' '+g.citySoul+'/'+(COSTS[g.level-1]??'—'),'城主当前魂／下次升级费用；最多持有 '+CITY_SOUL_LIMIT+' 魂')}
     ${badge(icon('◷','大轮')+' '+g.round,'当前大轮')}</div>
@@ -77,9 +100,8 @@ function updateBoard(){
     ${button('遭遇弃牌 <b>'+g.eventDiscard.length+'</b>','inspect','discard','pile',false,'查看公开弃掉的遭遇牌。')}
     ${human==='city'?button('城主手牌 <b>'+g.hand.length+'</b>','inspect','hand','pile',false,'查看自己的城主手牌。'):badge('城主手牌 '+g.hand.length,'冒险者只能知道城主持牌数量。')}
     ${badge('物资牌堆 '+g.goods.length,'普通物资剩余张数。')}${badge('物资弃牌 '+g.goodsDiscard.length,'已公开弃置的普通物资。')}</div></div>
-    <div class="panel objectives"><div class="section-title">${icon('◆','冒险者碎片')} 碎片 <span>${g.fragments}/5</span></div>
-    <div class="progress" title="冒险者收集五枚碎片获胜">${Array.from({length:5},(_,i)=>`<i class="${i<g.fragments?'filled':''}"></i>`).join('')}</div>
-    <h3>共鸣 / 巡礼</h3><div class="stats" title="最近两次有效探索。三次同纹或三纹各异完成任务，各奖励一枚。任务与牌面奖励同时达成时，各得一枚。">${[0,1].map(i=>g.history[i]?pattern(g.history[i]):badge('–','空位')).join('')}${badge('◆ '+TASK_REWARD,'本阶段每次任务奖励的碎片数')}</div></div>`;
+    `;
+  drawObjectives(g);
   $('signal').textContent=localize(g.logs.at(-1)?.text??'');
   updateMap();
   $('heroes').innerHTML=g.heroes.map(h=>`<section class="panel hero ${h.id===g.turn&&g.side==='party'?'active':''}">
@@ -90,6 +112,12 @@ function updateBoard(){
 }
 function updateMap(){
   const g=game, e=g.encounter;
+  const turning=g.phase==='orient'&&g.side===human&&!feedback;
+  if(turning&&orientationDraft?.encounter!==e)orientationDraft={encounter:e,angle:e.orientations[0].rotation};
+  if(!turning)orientationDraft=null;
+  const draft=turning?roomRotation(g,orientationDraft.angle):null;
+  const needed=taskHint(g.history,PATTERNS).needed;
+  const recent=g.lastOrientation&&g.logs.length-g.lastOrientation.logSize<=3?g.lastOrientation:null;
   const canAct=human==='party'&&g.phase==='action';
   const explore=canAct&&g.slots.some(Boolean)?g.targets():[];
   const travel=canAct?g.travelTargets():[];
@@ -98,22 +126,33 @@ function updateMap(){
     const step=explore.find(t=>t.to===r.id);
     const accessible=moving?moving.has(r.id):step||travel.includes(r.id);
     const status=r.state==='covered'?'未探索':r.state==='pending'?'待定向':r.id===g.start?'入口':'已探索';
-    const doors=[...r.doors,...(r.breachDoors??[])].map(d=>{
+    const isTurn=turning&&e.to===r.id;
+    const doors=[...(isTurn?draft.doors:r.doors),...(r.breachDoors??[])].map(d=>{
       const to=neighbor(r.id,d);
-      const color=connected(g.rooms,r.id,d)?'linked':to!==null&&g.rooms[to].state==='covered'?'unopened':'wall';
+      const color=isTurn?doorState(g,r.id,d,e.entry):connected(g.rooms,r.id,d)?'linked':to!==null&&g.rooms[to].state==='covered'?'unopened':'wall';
       return `<i class="door d${d} ${color} ${r.breachDoors?.includes(d)?'breached':''}" title="${r.breachDoors?.includes(d)?'破墙通道':color==='linked'?'已连通':color==='unopened'?'通往未探索房':'门对面是墙或边界'}" aria-hidden="true"></i>`;
     }).join('');
     const tokens=g.heroes.filter(h=>h.pos===r.id).map(h=>{
       const eligible=canAct&&g.partyOptions().includes(h.id)&&h.id!==g.turn;
       return `<button class="token t${h.id} ${selected.has(h.id)&&canAct?'picked':''}" data-act="${eligible?'team':'token'}" data-v="${moving?r.id:h.id}" title="${escape(h.name+' · '+(eligible?'选入或移出探索小队':h.specialty))}" aria-label="${escape(h.name)}">${h.soul?glyph[h.specialty]:'†'}</button>`;
     }).join('');
-    return `<div class="room ${r.state} ${r.pattern?'pattern p'+PATTERNS.indexOf(r.pattern):'entrance'} ${accessible?'reachable':''} ${dest===r.id?'selected':''} ${e?.to===r.id?'current-room':''}">
-    <button class="room-button" data-act="room" data-v="${r.id}" title="${escape(`${status}${r.pattern?' · '+patternName(r.pattern):''}${step?.breach?' · 可破墙':''}`)}" aria-label="${escape(`房间 ${r.id+1} ${status} ${r.pattern?patternName(r.pattern):''}`)}">${r.id===g.start?'⌂':pattern(r.pattern)}</button>${doors}<div class="tokens">${tokens}</div>
+    return `<div class="room ${r.state} ${r.pattern?'pattern p'+PATTERNS.indexOf(r.pattern):'entrance'} ${accessible?'reachable':''} ${dest===r.id?'selected':''} ${e?.to===r.id?'current-room':''} ${isTurn?'rotating-focus':''} ${isTurn&&!draft.legal?'rotation-invalid':''} ${recent?.to===r.id?'recent-turn':''} ${r.state==='covered'&&needed.includes(r.pattern)?'task-target':''}">
+    <span class="tile-face ${isTurn&&animateTile?'tile-turn':''}">${doors}</span>
+    <button class="room-button" data-act="${isTurn?'rotate-preview':'room'}" data-v="${r.id}" title="${escape(`${status}${r.pattern?' · '+patternName(r.pattern):''}${step?.breach?' · 可破墙':''}`)}" aria-label="${escape(`房间 ${r.id+1} ${status} ${r.pattern?patternName(r.pattern):''}`)}">${r.id===g.start?'⌂':pattern(r.pattern)}</button><div class="tokens">${tokens}</div>
     ${step?.breach?'<span class="breach" title="全队没有其他可达新门">↗</span>':''}</div>`;
   }).join('');
   const h=g.actor;
   let controls='';
   if(cover==='mapTool')controls=button('取消','close')+badge(icon('↗','疾跑')+' 选择高亮房间','疾跑不耗行动');
+  else if(turning){
+    const boardOption=rotationDifference(e.orientations);
+    controls='<div class="turn-tools"><strong>'+(e.orientCity?'城主':'冒险者')+'旋转 · 房 '+(e.to+1)+'</strong>'+
+      button('↻ 转 90°','rotate-preview','','',false,'在原房间顺时针旋转 90 度')+
+      button('确认方向','orient',draft.index,'primary',!draft.legal)+
+      '<small>'+(!draft.legal?'来路未接通，继续旋转':!boardOption?'可选朝向的实际通路相同':'来路必须保持接通')+'</small></div>'+
+      '<div class="route-legend"><span>房 '+(e.from+1)+' → 房 '+(e.to+1)+'</span><span class="gold">━ 已连接</span><span class="cyan">━ 通往盖房</span><span class="gray">━ 墙或边界</span></div>';
+    animateTile=false;
+  }
   else if(feedback)controls=button('查看对方行动结果','show','','primary');
   else if(canAct){
     const next=explore.find(s=>s.to===dest);
@@ -160,7 +199,7 @@ function scene(){
   if(!g)return showMenu();
   if(feedback&&!hidden){
     const dice=feedback.dice;
-    return modal('冒险者行动结果',`${dice?`<div class="observed-dice">${badge(stanceName(dice.mode),'本场最终锁定的骰法')}${dice.revealed?diceMarkup(dice.values,dice.chosen):''}</div>`:''}<div class="feedback-list">${feedback.lines.map(text=>`<p>${escape(localize(text))}</p>`).join('')}</div>`,button('继续','feedback-next','','primary')+button('本局跳过结果弹窗','feedback-skip'));
+    return modal('冒险者行动结果',`${feedback.monster?monsterPacket(feedback.monster.card,feedback.monster.monster,'observed'):''}${dice?`<div class="observed-dice">${badge(stanceName(dice.mode),'本场最终锁定的骰法')}${dice.revealed?diceMarkup(dice.values,dice.chosen):''}</div>`:''}<div class="feedback-list">${feedback.lines.map(text=>`<p>${escape(localize(text))}</p>`).join('')}</div>`,button('继续','feedback-next','','primary')+button('本局跳过结果弹窗','feedback-skip'));
   }
   if(g.winner)return modal(g.winner+'获胜',`<p class="hint">${escape(g.reason)} · 第 ${g.round} 轮</p>`,button('导出记录','export')+button('新对局','reset','','primary'),false);
   if(hidden||g.side!==human)return '';
@@ -175,17 +214,13 @@ function scene(){
     return modal('开门前',choices+cardRow(g.slots.map((s,i)=>s?encounterCard(s.card,{act:'reveal',value:i,back:!s.open}):'').join(''))+toolBar(),'',
       true,patternName(g.rooms[e.to].pattern)+' · 确认承担者并选一张遭遇');
   }
-  if(g.phase==='revealed')return modal('遭遇揭晓',cardRow(encounterCard(e.card))+toolBar(),button('继续','continue','','primary'));
-  if(g.phase==='monster'){
-    const r=e.monster.reward,item=data.items.loot[r.lootRef];
-    const monster=`<article class="card monster"><small>${e.card.tier} 级怪物</small><h2>${escape(e.monster.name)}</h2><div class="card-type">${icon('✶','怪物')}</div><div class="outcome good"><span>成功</span>${r.effect==='fragment'?describeEffect(r):badge(icon('▣','取得右侧配对素材'),'获得配对素材')}</div></article>`;
-    return modal('怪物',cardRow(monster+(item?itemCard({...item,monster:true}):'')),button('准备检定','monster','','primary'));
-  }
+  if(g.phase==='revealed')return modal('遭遇揭晓',cardRow(encounterCard(e.card))+toolBar(),button(e.card.kind==='战斗'?'抽出怪物':'继续','continue','','primary'));
+  if(g.phase==='monster')return modal('战斗',monsterPacket(e.card,e.monster),button('准备检定','monster','','primary'));
   if(g.phase==='trade'){
     const o=e.card.offer,bonus=g.buyer.specialty==='魅力'?o.charmExtraReveal:0;
     return modal('商人报价',cardRow(encounterCard(e.card))+`<div class="offer-line">${badge(price(o),'成交才付款')}${badge(`成功翻 ${o.revealByResult.success+bonus} 件`,'成功后货物候选与购买上限')}${badge(`失败翻 ${o.revealByResult.failure+bonus} 件`,'失败后货物候选；另执行牌上罚则')}</div>`,button('离开','trade','no')+button('接受检定','trade','yes','primary'));
   }
-  if(g.phase==='check'||g.phase==='rolled')return modal(e.card.kind+'检定',stancePanel()+toolBar(),
+  if(g.phase==='check'||g.phase==='rolled')return modal(e.card.kind+'检定',monsterPacket(e.card,e.monster,true)+stancePanel()+toolBar(),
     g.phase==='check'?button('掷骰','roll','','primary'):button(` ${diceBusy?'掷骰中…':('取 '+g.value()+' · '+(g.value()>=e.card.dc?'成功':'失败'))}`,'resolve','','primary',diceBusy),true,e.card.name+' · DC'+e.card.dc);
   if(g.phase==='damage'&&e.damage.parts){
     const costs=e.damage.parts.map(([id,amount])=>badge(escape(g.heroes[id].name)+' −'+amount+' 魂','确认分配前的原始损失')).join('');
@@ -201,19 +236,7 @@ function scene(){
     const p=g.pending;
     return modal(p.title,`<div class="choice-list">${p.options.map((o,i)=>button(escape(o.label),'choice',i)).join('')}</div>`);
   }
-  if(g.phase==='orient'){
-    const room=g.rooms[e.to];
-    const rotations=e.orientations.map((o,i)=>{
-      const marker=pattern(room.pattern);
-      const doors=o.doors.map(d=>{
-        const state=d===e.entry?'linked':blockedDoor(g.rooms,e.to,d)?'wall':'unopened';
-        return `<i class="door d${d} ${state}" title="${['北','东','南','西'][d]} · ${{linked:'来路',unopened:'可用出口',wall:'门对面是墙或边界'}[state]}"></i>`;
-      }).join('');
-      return button(`<span class="room preview pattern p${PATTERNS.indexOf(room.pattern)}">${marker}${doors}</span><small>${o.rotation*90}°</small>`,'orient',i,'',false,`${o.doors.length}扇门，${o.doors.length-o.viable.length}扇目前封闭`);
-    });
-    return modal('旋转地砖',`<div class="rotations">${rotations.join('')}</div><p class="hint">同一块地砖 · ${room.shape.length} 扇门　｜　灰门朝向墙面或地图边缘</p>`,
-      '',true,e.orientCity?'遭遇失败 · 城主定向':'遭遇完毕 · 保留来路');
-  }
+  if(g.phase==='orient')return '';
   return '';
 }
 function render(){
@@ -236,13 +259,14 @@ function schedule(){
       aiStep(g);
       g.trace.push({round,phase,actor:'ai'});
       if(observe){
+        if(g.phase==='monster'&&g.encounter.monster)observedMonster={card:g.encounter.card,monster:g.encounter.monster};
         aiRecords.push(...g.logs.slice(before).map(l=>l.text));
         const stops=turn!==g.turn||round!==g.round||g.winner||g.side==='city'||(e&&!g.encounter);
         if(stops){
           if(aiRecords.length&&!skipFeedback){
-            feedback={lines:aiRecords,dice:aiDice};hidden=false;
+            feedback={lines:aiRecords,dice:aiDice,monster:observedMonster};hidden=false;
           }
-          aiRecords=[];aiDice=null;
+          aiRecords=[];aiDice=null;observedMonster=null;
         }
       }
       render();
@@ -252,7 +276,7 @@ function schedule(){
         const holder=document.querySelector('.observed-dice');
         if(holder){
           holder.insertAdjacentHTML('beforeend',diceMarkup(current.dice.values.map(()=>'?'),undefined,true));
-          animateDice(holder.querySelector('.dice'),current.dice.values,()=>{if(feedback===current&&!hidden)render();},620);
+          animateDice(holder.querySelector('.dice'),current.dice.values,()=>{if(feedback===current&&!hidden&&holder.isConnected)holder.querySelector('.dice').outerHTML=diceMarkup(current.dice.values,current.dice.chosen);},620);
         }
       }
       schedule();
@@ -277,8 +301,8 @@ function exportLog(){
 }
 function handle(action,value){
   if(action==='choose-side'){human=value;render();return;}
-  if(action==='start'){game=new Game(data);actionKey='';feedback=null;aiRecords=[];aiDice=null;skipFeedback=false;selected=new Set([0]);aiRun=0;render();schedule();return;}
-  if(action==='reset'){clearTimeout(timer);game=null;feedback=null;aiRecords=[];aiDice=null;diceBusy=false;tool=null;cover='';hidden=false;selected.clear();cityPicks.clear();cityPattern=null;dest=null;render();return;}
+  if(action==='start'){observedMonster=null;orientationDraft=null;game=new Game(data);actionKey='';feedback=null;aiRecords=[];aiDice=null;skipFeedback=false;selected=new Set([0]);aiRun=0;render();schedule();return;}
+  if(action==='reset'){observedMonster=null;orientationDraft=null;clearTimeout(timer);game=null;feedback=null;aiRecords=[];aiDice=null;diceBusy=false;tool=null;cover='';hidden=false;selected.clear();cityPicks.clear();cityPattern=null;dest=null;render();return;}
   if(action==='export'){exportLog();return;}
   if(action==='inspect'){cover='inspect:'+value;render();schedule();return;}
   if(action==='close'){tool=null;cover='';render();schedule();return;}
@@ -301,6 +325,9 @@ function handle(action,value){
     if(found<0){toast('请选择高亮的已探索房间');return;}
     applyItem(game,tool.id,tool.card.uid,found);game.trace.push({action:'use-item',item:tool.card.name,target:index});
     cover='';tool=null;dest=null;selected=new Set([game.turn]);after(before);return;
+  }
+  if(action==='rotate-preview'&&game.phase==='orient'&&orientationDraft){
+    orientationDraft.angle=(orientationDraft.angle+1)%4;animateTile=true;render();return;
   }
   if(action==='room'&&game.phase==='action'){dest=index;render();return;}
   if(action==='token')return;

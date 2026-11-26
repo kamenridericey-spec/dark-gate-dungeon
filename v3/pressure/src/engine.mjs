@@ -315,7 +315,7 @@ export class Game {
     this.assert(this.phase==='orient'&&e.orientations[index],'选一个保留来路的朝向');
     const chosen=e.orientations[index];const room=this.rooms[e.to];
     this.assert(chosen.doors.length===room.shape.length,'旋转必须保留地砖门数');
-    room.state='open';room.doors=chosen.doors;
+    room.state='open';room.doors=chosen.doors;this.lastOrientation={to:room.id,logSize:this.logs.length};
     this.note(`${e.orientCity?'城主':this.heroes[e.actor].name} 为房间 ${e.to+1} 定向（${chosen.rotation*90}°）。`);
     this.metrics.rotations++;if(e.orientCity){this.metrics.cityRotations++;if(new Set(e.orientations.map(o=>o.viable.join())).size>1)this.metrics.meaningfulCityRotations++;}
     this.eventDiscard.push(e.card);if(e.monster)this.monsterDiscard[e.card.tier].push(e.monster);
