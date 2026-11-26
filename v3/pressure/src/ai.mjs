@@ -1,6 +1,6 @@
-import {PATTERNS,frontiers,neighbor} from './map.mjs?p=4';
-import {recordPattern,TASK_REWARD} from './rules.mjs?p=4';
-import {applyItem,itemTargets} from './items.mjs?p=4';
+import {PATTERNS,frontiers,neighbor} from './map.mjs?p=5';
+import {recordPattern,TASK_REWARD} from './rules.mjs?p=5';
+import {applyItem,itemTargets} from './items.mjs?p=5';
 
 function patternRisk(g,p){
   if(g.excluded.has(p))return 0;
@@ -33,7 +33,7 @@ function bestAssignment(g,ids,pattern){
   return ids.flatMap(id=>slots.map(({slot,i})=>({id,i,score:knownSlotScore(g,g.heroes[id],slot,pattern)+(g.heroes[id].soul-2)*0.18}))).sort((a,b)=>b.score-a.score)[0];
 }
 function itemValue(card){
-  return ({insight:4,replaceEncounter:3.6,sprint:3.5,magicDoor:3.5,reverse:3.2,forceNormal:3.2,reverseGuard:3.2,substitute:3,heal2:2.7,reroll:2.6,heal1:2.1,healAll:2.4,transform:2.4,guard:1.5,guard2:1.8,peek:0.5})[card?.effect]??2;
+  return ({insight:4,replaceEncounter:3.6,sprint:3.5,magicDoor:3.5,reverse:3.2,forceNormal:3.2,reverseGuard:3.2,substitute:3,requireAttribute:3,monsterFood:3,soulBell:2.7,heal2:2.7,reroll:2.6,heal1:2.1,healAll:2.4,transform:2.4,guard:1.5,guard2:1.8,peek:0.5})[card?.effect]??2;
 }
 function useBeforeEncounter(g){
   const e=g.encounter,hero=g.actor;
@@ -79,11 +79,15 @@ function useHelpfulItem(g){
     const opts=itemTargets(g,h.id,item);if(!opts.length)continue;
     const fx=item.effect;
     let idx=-1;
+    if(g.phase==='action'&&['soulBell','heal1','heal2'].includes(fx))idx=opts.findIndex(o=>!g.heroes[o.arg].soul);
+    if(g.phase==='action'&&fx==='healAll'&&g.heroes.some(ally=>ally.pos===h.pos&&!ally.soul))idx=0;
     if(g.phase==='check'){
       if(['heal1','heal2'].includes(fx))idx=opts.findIndex(o=>o.arg===e.bearer&&g.buyer.soul<=2);
       if(fx==='healAll'&&e.party.some(i=>g.heroes[i].soul<=2))idx=0;
       if(['reverse','reverseGuard','forceNormal','boost','boost2','boostGuard','battleBoost','crown'].includes(fx)&&(g.mode()<0||(g.mode()===0&&e.card.dc>=11&&(['boost','boost2','boostGuard','battleBoost','crown'].includes(fx))&&(g.fragments>=3||e.card.failure.some(f=>f.effect==='loseSoul'&&f.amount>=g.buyer.soul)))))idx=0;
       const risk=e.card.failure.filter(f=>f.effect==='loseSoul').reduce((n,f)=>n+f.amount,0);
+      if(fx==='requireAttribute'&&!e.normal&&item.attribute===g.buyer.specialty)idx=0;
+      if(fx==='monsterFood'&&e.party.length===1&&!e.coffin&&g.mode()<=0&&risk-e.guard>=g.buyer.soul)idx=0;
       if(['guard','guard2'].includes(fx)&&g.buyer.soul<=2&&risk>e.guard)idx=0;
       if(fx==='coffin'&&!e.coffin&&risk-e.guard>=g.buyer.soul)idx=0;
     }
@@ -124,7 +128,7 @@ function cityPlan(g,style){
 }
 export function aiStep(g,strategy='dynamic',cityStrategy='pressure'){
   const e=g.encounter;
-  if(g.side==='party'&&['check','rolled','damage'].includes(g.phase)&&useHelpfulItem(g))return;
+  if(g.side==='party'&&['action','check','rolled','damage'].includes(g.phase)&&useHelpfulItem(g))return;
   if(g.side==='party'&&['action','door','revealed'].includes(g.phase)&&useBeforeEncounter(g))return;
   switch(g.phase){
     case 'city':{

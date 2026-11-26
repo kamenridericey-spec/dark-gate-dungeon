@@ -1,13 +1,20 @@
-import {ROLES} from './rules.mjs?p=4';
-import {DIRS,neighbor,opposite,connected,hasDoor} from './map.mjs?p=4';
+import {ROLES} from './rules.mjs?p=5';
+import {DIRS,neighbor,opposite,connected,hasDoor} from './map.mjs?p=5';
 
 const windows = {
-  action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
+  action:'行动前',door:'开门前',revealed:'遭遇揭晓后',monster:'怪物出现后',
   check:'检定前',rolled:'检定后',damage:'受伤前',
 };
 const samePlace = (a,b)=>a.pos===b.pos;
+const healing=new Set(['heal1','heal2','healAll']);
 export function itemTargets(g,id,item){
   const h=g.heroes[id],e=g.encounter,win=windows[g.phase],fx=item.effect;
+  if(item.windows?.includes('冒险者操作时')){
+    if(g.winner||g.side!=='party'||g.phase==='choice'||!h.soul)return [];
+    const inNeed=g.heroes.filter(a=>samePlace(a,h)&&a.soul<a.max);
+    if(fx==='soulBell')return h.soul>1?inNeed.filter(a=>a.id!==id).map(a=>({arg:a.id,label:`给 ${a.name} 1 魂`})) : [];
+    if(healing.has(fx))return healOptions(inNeed,fx);
+  }
   const allowed=item.windows??({掷前:['检定前'],掷后:['检定后'],准备:['行动前','开门前']}[item.timing]??[]);
   if(!win||!h.soul||g.winner||!allowed.includes(win))return [];
   if(e?!e.party.includes(id)&&!(h.state==='explored'&&samePlace(h,g.buyer)):id!==g.turn)return [];
@@ -21,21 +28,24 @@ export function itemTargets(g,id,item){
   if(fx==='insight')return g.slots.flatMap((s,i)=>s&&!s.open?[{arg:i,label:`亮出这张 ${s.card.tier} 级牌`}]:[]);
   if(fx==='peek')return g.goods.length?[{label:'查看堆顶'}]:[];
   if(fx==='transform')return ROLES.filter(r=>r!==h.specialty).map(r=>({arg:r,label:r}));
+  if(fx==='requireAttribute')return item.attribute===g.checkAttribute?[]:[{arg:item.attribute,label:`改为${item.attribute}检定`}];
+  if(fx==='monsterFood')return e?.monster?[{label:'喂走怪物'}]:[];
   if(fx==='replaceEncounter')return !e.replaced&&(g.events.length||g.eventDiscard.length)?[{label:'另抽一张'}]:[];
   if(fx==='substitute'){
     if(e.damage?.area)return [];
     if(g.phase==='check'&&e.card.offer)return [];
     return e.party.flatMap(i=>g.heroes[i].soul&&i!==(e.damage?.target??e.bearer)?[{arg:i,label:g.heroes[i].name}]:[]);
   }
-  if(['heal1','heal2','healAll'].includes(fx)){
-    const others=g.heroes.filter(a=>samePlace(a,h)&&a.soul<a.max);
-    return fx==='healAll'?(others.length?[{label:'治疗同房队员'}]:[]):others.map(a=>({arg:a.id,label:a.name}));
-  }
+  if(healing.has(fx))return healOptions(g.heroes.filter(a=>samePlace(a,h)&&a.soul<a.max),fx);
   if(['reroll','plus1','plus2','twenty','floor10'].includes(fx))return e.dice.map((d,i)=>({arg:i,label:`骰子 ${i+1} · ${d}`}));
   if(fx==='battleBoost'&&e.card.kind!=='战斗')return [];
   if(fx==='forceNormal'&&e.normal)return [];
   if(['guard','guard2','boostGuard','reverseGuard','coffin','battleBoost','boost','boost2','reverse','forceNormal','crown'].includes(fx))return [{label:'使用'}];
   return [];
+}
+function healOptions(heroes,effect){
+  if(effect==='healAll')return heroes.length?[{label:'治疗同房队员'}]:[];
+  return heroes.map(a=>({arg:a.id,label:a.name}));
 }
 export function applyItem(g,id,uid,index){
   const h=g.heroes[id],item=h.hand.find(i=>i.uid===uid),e=g.encounter;
@@ -53,6 +63,9 @@ export function applyItem(g,id,uid,index){
     case 'insight':g.slots[arg].open=true;g.note(`亮牌：「${g.slots[arg].card.name}」还留在原位。`);break;
     case 'peek':g.note(`货堆最上面是「${g.goods[0].name}」。`);break;
     case 'transform':h.specialty=arg;break;
+    case 'requireAttribute':e.attributeOverride=arg;g.note(`换个办法！这次用${arg}检定。`);break;
+    case 'monsterFood':break;
+    case 'soulBell':h.soul--;g.note(`${h.name}分出 1 魂，自己还剩 ${h.soul} 魂。`);g.heal(arg,1);break;
     case 'replaceEncounter':{
       const fresh=g.drawEvents(1)[0];g.eventDiscard.push(e.card);e.card=fresh;e.replaced=true;
       g.note(`换了一扇门。新遭遇是「${fresh.name}」。`);break;
@@ -79,4 +92,5 @@ export function applyItem(g,id,uid,index){
   h.hand.splice(h.hand.indexOf(item),1);g.discard(item);g.metrics.items++;
   g.metrics.itemEffects[item.effect]=(g.metrics.itemEffects[item.effect]??0)+1;
   g.note(`${h.name} 使用「${item.name}」。`);
+  if(item.effect==='monsterFood')g.feedMonster();
 }

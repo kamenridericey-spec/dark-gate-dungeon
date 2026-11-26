@@ -1,4 +1,4 @@
-import {blockedDoor,neighbor} from './map.mjs?p=4';
+import {blockedDoor,neighbor} from './map.mjs?p=5';
 
 export function taskHint(history,patterns){
   if(history.length<2)return {needed:[],label:history.length?'再成功开一间房':'成功开房就记纹样'};
@@ -8,8 +8,7 @@ export function taskHint(history,patterns){
 export function roomRotation(game,angle){
   const e=game.encounter;
   const doors=game.rooms[e.to].shape.map(d=>(d+angle)%4).sort();
-  const legal=doors.includes(e.entry);
-  const index=legal?e.orientations.findIndex(option=>option.doors.join()===doors.join()):-1;
+  const index=e.orientations.findIndex(option=>option.doors.join()===doors.join());
   return {doors,index,legal:index>=0};
 }
 export function doorState(game,id,dir,entry){

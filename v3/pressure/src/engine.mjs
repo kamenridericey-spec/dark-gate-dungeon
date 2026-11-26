@@ -1,5 +1,5 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?p=4';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?p=4';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?p=5';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?p=5';
 
 import {patternLabels} from './table-copy-ui.mjs';
 
@@ -46,6 +46,7 @@ export class Game {
   drawMonster(key){return this.draw(this.monsters[key],this.monsterDiscard[key],1,`${key}级怪物`)[0];}
   get actor(){return this.heroes[this.turn];}
   get buyer(){return this.heroes[this.encounter.bearer];}
+  get checkAttribute(){return this.encounter?.attributeOverride??this.encounter?.card?.attribute;}
   get need(){return this.slots.filter(s=>!s).length;}
   get canUpgrade(){return this.phase==='city'&&!this.upgraded&&this.level<CITY_WIN_LEVEL&&this.citySoul>=COSTS[this.level-1];}
   get mustUpgrade(){return this.canUpgrade&&this.level<3&&this.upgradeDue===this.level;}
@@ -155,7 +156,13 @@ export class Game {
     if(yes){this.metrics.tradeAccepted++;this.phase='check';return;}
     this.note('看了眼价格，转身走了。');this.finishCheck();
   }
-  strength(){const e=this.encounter;return Number(this.buyer.specialty===e.card.attribute)-Number(e.hit)+e.delta;}
+  strength(){const e=this.encounter;return Number(this.buyer.specialty===this.checkAttribute)-Number(e.hit)+e.delta;}
+  feedMonster(){
+    const e=this.encounter;
+    this.assert(e?.monster&&['monster','check'].includes(this.phase),'现在不能喂怪物');
+    this.note(`${e.monster.name}叼着口粮走了。这场不打，也不记任务。`);
+    this.finishCheck();
+  }
   mode(){return this.encounter.normal?0:Math.sign(this.strength());}
   roll(){
     this.assert(this.phase==='check','当前不可掷骰');

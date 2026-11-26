@@ -49,9 +49,10 @@ export function frontiers(rooms,id,breach=false){
 }
 export function orientations(rooms,id,entry){
   const choices = new Map();
+  const magicEntry=rooms[id].magicDoors?.includes(entry);
   for(const rotation of DIRS){
     const doors=rooms[id].shape.map(d=>(d+rotation)%4).sort();
-    if(!doors.includes(entry)) continue;
+    if(!magicEntry&&!doors.includes(entry)) continue;
     const exits=[...new Set([...doors,...(rooms[id].magicDoors??[])])].sort();
     const viable=exits.filter(d=>{
       return d===entry || !blockedDoor(rooms,id,d);

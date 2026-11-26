@@ -74,7 +74,7 @@
       "effect": "heal1",
       "text": "选同一间房里的一人，回魂 1。可以选自己。",
       "windows": [
-        "检定前"
+        "冒险者操作时"
       ],
       "legacyEffect": "heal1",
       "implementedInV2": true,
@@ -124,7 +124,7 @@
       "effect": "heal1",
       "text": "选同一间房里的一人，回魂 1。可以选自己。",
       "windows": [
-        "检定前"
+        "冒险者操作时"
       ],
       "legacyEffect": "heal1",
       "implementedInV2": true,
@@ -148,20 +148,15 @@
       "inventoryType": "unified"
     },
     {
-      "id": "DEMO-REW-10",
+      "id": "CHECK-FIST",
+      "name": "用拳头说话",
+      "attribute": "体魄",
       "tier": 1,
-      "name": "短矛",
-      "equipment": false,
-      "timing": "掷前",
-      "effect": "battleBoost",
-      "text": "只在战斗中用，给冒险者 1 个优势。",
+      "effect": "requireAttribute",
       "windows": [
         "检定前"
       ],
-      "legacyEffect": "battleBoost",
-      "implementedInV2": true,
-      "originalKind": "装备",
-      "inventoryType": "unified"
+      "text": "把这次检定改为体魄。出手的人、难度和牌上的奖惩照旧。"
     },
     {
       "id": "DEMO-REW-11",
@@ -256,7 +251,7 @@
       "effect": "heal2",
       "text": "选同一间房里的一人，回魂 2。可以选自己。",
       "windows": [
-        "检定前"
+        "冒险者操作时"
       ],
       "legacyEffect": "heal2",
       "implementedInV2": true,
@@ -281,20 +276,15 @@
       "inventoryType": "unified"
     },
     {
-      "id": "DEMO-REW-19",
+      "id": "CHECK-BRAIN",
+      "name": "用脑子行事",
+      "attribute": "心智",
       "tier": 2,
-      "name": "带刺的盾",
-      "equipment": false,
-      "timing": "掷前",
-      "effect": "boostGuard",
-      "text": "给冒险者 1 个优势，并替出手的人挡伤 1。",
+      "effect": "requireAttribute",
       "windows": [
         "检定前"
       ],
-      "legacyEffect": "boostGuard",
-      "implementedInV2": true,
-      "originalKind": "装备",
-      "inventoryType": "unified"
+      "text": "把这次检定改为心智。出手的人、难度和牌上的奖惩照旧。"
     },
     {
       "id": "DEMO-REW-21",
@@ -305,7 +295,7 @@
       "effect": "healAll",
       "text": "你这间房里的冒险者各回魂 1。",
       "windows": [
-        "检定前"
+        "冒险者操作时"
       ],
       "legacyEffect": "healAll",
       "implementedInV2": true,
@@ -345,20 +335,15 @@
       "inventoryType": "unified"
     },
     {
-      "id": "DEMO-REW-24",
+      "id": "CHECK-TALK",
+      "name": "用嘴皮子",
+      "attribute": "魅力",
       "tier": 3,
-      "name": "照回去的盾",
-      "equipment": false,
-      "timing": "掷前",
-      "effect": "reverseGuard",
-      "text": "逆转双方当前的优势，再替出手的人挡伤 1。",
+      "effect": "requireAttribute",
       "windows": [
         "检定前"
       ],
-      "legacyEffect": "reverseGuard",
-      "implementedInV2": true,
-      "originalKind": "装备",
-      "inventoryType": "unified"
+      "text": "把这次检定改为魅力。出手的人、难度和牌上的奖惩照旧。"
     },
     {
       "id": "DEMO-REW-25",
@@ -382,7 +367,7 @@
       "tier": 4,
       "effect": "healAll",
       "windows": [
-        "检定前"
+        "冒险者操作时"
       ],
       "text": "你这间房里的冒险者各回魂 1。"
     },
@@ -449,14 +434,45 @@
       "inventoryType": "unified"
     },
     {
-      "id": "TRAVEL-CIRCLE-II",
-      "tier": 2,
       "name": "魔法圈",
       "effect": "magicDoor",
       "windows": [
         "行动前"
       ],
-      "text": "在你这间房和隔壁房之间放一枚门标记，打通这面墙。门一直留着。新房照常探索。"
+      "text": "打通你和隔壁房之间的墙，留下永久双向门。进新房照常探索，地砖转向时门标记留在原地。",
+      "id": "TRAVEL-CIRCLE-I",
+      "tier": 1
+    },
+    {
+      "name": "魔法圈",
+      "effect": "magicDoor",
+      "windows": [
+        "行动前"
+      ],
+      "text": "打通你和隔壁房之间的墙，留下永久双向门。进新房照常探索，地砖转向时门标记留在原地。",
+      "id": "TRAVEL-CIRCLE-II",
+      "tier": 2
+    },
+    {
+      "id": "MONSTER-FOOD-I",
+      "tier": 1,
+      "name": "怪物口粮",
+      "effect": "monsterFood",
+      "windows": [
+        "怪物出现后",
+        "检定前"
+      ],
+      "text": "喂走眼前这只怪物。本次探索照常花掉，直接摆房间，没有奖惩，也不记任务。"
+    },
+    {
+      "id": "SOUL-BELL-II",
+      "tier": 2,
+      "name": "救命铃",
+      "effect": "soulBell",
+      "windows": [
+        "冒险者操作时"
+      ],
+      "text": "把自己的 1 魂给同房队友，包括已经倒下的人。用完自己至少留 1 魂。"
     }
   ],
   "loot": {
@@ -528,7 +544,10 @@
       "originalKind": "道具",
       "inventoryType": "unified",
       "tier": 2,
-      "id": "MON-II-02"
+      "id": "MON-II-02",
+      "windows": [
+        "冒险者操作时"
+      ]
     },
     "MON-II-03": {
       "name": "青蛙面具",

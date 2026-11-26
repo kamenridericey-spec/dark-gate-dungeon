@@ -1,9 +1,9 @@
-import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs?p=4';
-import {applyItem,itemTargets} from './items.mjs?p=4';
-import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?p=4';
-import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs?p=4';
-import {diceMarkup,animateDice} from './dice.mjs?p=4';
-import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?p=4';
+import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs?p=5';
+import {applyItem,itemTargets} from './items.mjs?p=5';
+import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?p=5';
+import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs?p=5';
+import {diceMarkup,animateDice} from './dice.mjs?p=5';
+import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?p=5';
 
 import {patternLabels,stamp,describeEffect,highlightItem,timingText,offerPrice,outcome,offerTerms,patternBonus,keyword} from './table-copy-ui.mjs';
 
@@ -118,7 +118,7 @@ function updateMap(){
     const magicDoors=r.state==='covered'?'':(r.magicDoors??[]).map(d=>{
       const to=neighbor(r.id,d);
       if(g.rooms[to].state!=='covered'&&r.id>to)return '';
-      return '<span class="magic-door d'+d+'" role="img" aria-label="魔法门" title="魔法门 · '+(r.id+1)+' 号房与 '+(to+1)+' 号房"></span>';
+      return '<span class="magic-door d'+d+'" role="img" aria-label="魔法门" title="魔法门 · '+(r.id+1)+' 号房与 '+(to+1)+' 号房 · 旋转时留在原地"></span>';
     }).join('');
     const tokens=g.heroes.filter(h=>h.pos===r.id).map(h=>{
       const eligible=canAct&&g.partyOptions().includes(h.id)&&h.id!==g.turn;
@@ -137,11 +137,12 @@ function updateMap(){
   }
   else if(turning){
     const boardOption=rotationDifference(e.orientations);
+    const magicEntry=g.rooms[e.to].magicDoors?.includes(e.entry);
     controls='<div class="turn-tools"><strong>'+(e.orientCity?'城主':'冒险者')+'旋转 · 房 '+(e.to+1)+'</strong>'+
       button('↻ 转 90°','rotate-preview','','',false,'在原房间顺时针旋转 90 度')+
       button('确认方向','orient',draft.index,'primary',!draft.legal)+
-      '<small>'+(!draft.legal?'来路未接通，继续旋转':!boardOption?'两个方向都通往同样的地方':'来路必须保持接通')+'</small></div>'+
-      '<div class="route-legend"><span>房 '+(e.from+1)+' → 房 '+(e.to+1)+'</span><span class="gold">━ 已连接</span><span class="cyan">━ 通往未开的房</span><span class="gray">━ 墙或边界</span></div>';
+      '<small>'+(!draft.legal?'来路未接通，继续旋转':magicEntry?'经魔法门进入 · 地砖可任意转':!boardOption?'两个方向都通往同样的地方':'来路必须保持接通')+'</small></div>'+
+      '<div class="route-legend"><span>房 '+(e.from+1)+' → 房 '+(e.to+1)+'</span><span class="gold">━ 已连接</span><span class="cyan">━ 通往未开的房</span><span class="gray">━ 墙或边界</span></div>'+toolBar();
     animateTile=false;
   }
   else if(feedback)controls=button('查看对方行动结果','show','','primary');
@@ -160,11 +161,11 @@ function toolBar(){
   return ready.length?`<div class="tool-bar">${icon('▣','当前可用的道具')}${ready.join('')}</div>`:'';
 }
 function stancePanel(){
-  const g=game,e=g.encounter,mode=e.mode??g.mode(),affinity=g.buyer.specialty===e.card.attribute;
+  const g=game,e=g.encounter,mode=e.mode??g.mode(),affinity=g.buyer.specialty===g.checkAttribute;
   const lines=[
     `<div class="stance-side"><span>${icon('♜','城主')} 城主</span><small title="猜中房间纹样，城主就多一个优势。">${pattern(g.rooms[e.to].pattern)} ${e.hit?'踩中机关':'没踩中机关'}</small></div>`,
     `<div class="stance-center"><strong>${stanceName(mode)}</strong><small>${mode<0?'掷两颗，取小':mode>0?'掷两颗，取大':'掷一颗'}</small>${diceMarkup(diceBusy?e.dice?.map(()=>'?'):e.dice,e.dice&&!diceBusy?g.value():undefined,diceBusy)}</div>`,
-    `<div class="stance-side"><span>${icon(glyph[g.buyer.specialty],g.buyer.specialty)} ${g.buyer.name}</span><small>${g.buyer.specialty} / ${e.card.attribute} · ${affinity?'对上了':'没对上'}</small></div>`
+    `<div class="stance-side"><span>${icon(glyph[g.buyer.specialty],g.buyer.specialty)} ${g.buyer.name}</span><small>${g.buyer.specialty} / ${g.checkAttribute} · ${affinity?'对上了':'没对上'}</small></div>`
   ];
   return `<div class="stance">${lines.join('')}</div>${e.normal?('<p class="hint">'+keyword('single')+'</p>'):e.delta?`<p class="hint">物品改变优势 ${e.delta>0?'+':''}${e.delta}</p>`:''}`;
 }
@@ -214,11 +215,11 @@ function scene(){
       true,patternName(g.rooms[e.to].pattern)+' · 选谁出手，再翻一张牌');
   }
   if(g.phase==='revealed')return modal({战斗:'门后有动静！',考验:'想办法过去',交易:'有人做生意'}[e.card.kind],cardRow(encounterCard(e.card))+toolBar(),button(e.card.kind==='战斗'?'看看是什么怪物':'继续','continue','','primary'));
-  if(g.phase==='monster')return modal('怪物来了！',monsterPacket(e.card,e.monster),button('迎战','monster','','primary'));
+  if(g.phase==='monster')return modal('怪物来了！',monsterPacket(e.card,e.monster)+toolBar(),button('迎战','monster','','primary'));
   if(g.phase==='trade'){
     const o=e.card.offer,bonus=g.buyer.specialty==='魅力'?o.charmExtraReveal:0;
     return modal('先问问价',cardRow(encounterCard(e.card,{charm:bonus}))+(bonus?'<p class="hint">魅力出手，多看 1 件。</p>':'')+
-      '<p class="hint">掷骰后就会结算牌上的结果，最后可以不买。</p>',button('直接走','trade','no')+button('掷骰看货','trade','yes','primary'));
+      '<p class="hint">掷骰后就会结算牌上的结果，最后可以不买。</p>'+toolBar(),button('直接走','trade','no')+button('掷骰看货','trade','yes','primary'));
   }
   if(g.phase==='check'||g.phase==='rolled')return modal(e.card.kind+'检定',monsterPacket(e.card,e.monster,true)+stancePanel()+toolBar(),
     g.phase==='check'?button('掷骰','roll','','primary'):button(` ${diceBusy?'掷骰中…':('取 '+g.value()+' · '+(g.value()>=e.card.dc?'成功':'失败'))}`,'resolve','','primary',diceBusy),true,e.card.name+' · 掷到 '+e.card.dc+' 就过关');
@@ -230,7 +231,7 @@ function scene(){
   if(g.phase==='goods'){
     const possible=g.paymentOptions().some(p=>g.recipients(p.key).length);
     return modal('选择货物',`<div class="offer-line">${offerPrice(e.card.offer)}<span>挑 1 件，或直接走。</span></div>`+
-      cardRow(e.goods.map((c,i)=>itemCard(c,'buy',i,!possible)).join(''))+(!possible?'<p class="hint">付不起，或同行的包都满了。</p>':''),button('不购买','leave','','primary'),true,e.success?'掷骰成功':'掷骰失败，照样能买');
+      cardRow(e.goods.map((c,i)=>itemCard(c,'buy',i,!possible)).join(''))+(!possible?'<p class="hint">付不起，或同行的包都满了。</p>':'')+toolBar(),button('不购买','leave','','primary'),true,e.success?'掷骰成功':'掷骰失败，照样能买');
   }
   if(g.phase==='choice'){
     const p=g.pending;
