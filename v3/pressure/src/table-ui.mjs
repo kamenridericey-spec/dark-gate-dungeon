@@ -1,4 +1,4 @@
-import {blockedDoor,neighbor} from './map.mjs?p=3';
+import {blockedDoor,neighbor} from './map.mjs?p=4';
 
 export function taskHint(history,patterns){
   if(history.length<2)return {needed:[],label:history.length?'再成功开一间房':'成功开房就记纹样'};

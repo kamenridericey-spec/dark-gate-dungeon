@@ -1,6 +1,6 @@
-import {PATTERNS,frontiers,neighbor} from './map.mjs?p=3';
-import {recordPattern,TASK_REWARD} from './rules.mjs?p=3';
-import {applyItem,itemTargets} from './items.mjs?p=3';
+import {PATTERNS,frontiers,neighbor} from './map.mjs?p=4';
+import {recordPattern,TASK_REWARD} from './rules.mjs?p=4';
+import {applyItem,itemTargets} from './items.mjs?p=4';
 
 function patternRisk(g,p){
   if(g.excluded.has(p))return 0;
@@ -33,7 +33,7 @@ function bestAssignment(g,ids,pattern){
   return ids.flatMap(id=>slots.map(({slot,i})=>({id,i,score:knownSlotScore(g,g.heroes[id],slot,pattern)+(g.heroes[id].soul-2)*0.18}))).sort((a,b)=>b.score-a.score)[0];
 }
 function itemValue(card){
-  return ({insight:4,replaceEncounter:3.6,sprint:3.5,reverse:3.2,forceNormal:3.2,reverseGuard:3.2,substitute:3,heal2:2.7,reroll:2.6,heal1:2.1,healAll:2.4,transform:2.4,guard:1.5,guard2:1.8,peek:0.5})[card?.effect]??2;
+  return ({insight:4,replaceEncounter:3.6,sprint:3.5,magicDoor:3.5,reverse:3.2,forceNormal:3.2,reverseGuard:3.2,substitute:3,heal2:2.7,reroll:2.6,heal1:2.1,healAll:2.4,transform:2.4,guard:1.5,guard2:1.8,peek:0.5})[card?.effect]??2;
 }
 function useBeforeEncounter(g){
   const e=g.encounter,hero=g.actor;
@@ -60,6 +60,15 @@ function useBeforeEncounter(g){
     if(card.effect==='sprint'&&g.phase==='action'&&g.slots.some(Boolean)&&!g.targets(id).length){
       const positions=options.map((o,i)=>({i,score:Math.max(0,...frontiers(g.rooms,o.arg,g.canBreach).map(f=>routeValue(g,f,hero)))})).sort((a,b)=>b.score-a.score);
       if(positions[0].score>0){applyItem(g,id,card.uid,positions[0].i);return true;}
+    }
+    if(card.effect==='magicDoor'&&g.phase==='action'&&g.slots.some(Boolean)){
+      const current=g.targets(id);
+      const bestCurrent=Math.max(0,...current.map(edge=>routeValue(g,edge,hero)));
+      const best=options.map((o,i)=>({i,to:o.arg})).filter(o=>g.rooms[o.to].state==='covered')
+        .map(o=>({...o,score:routeValue(g,o,hero)})).sort((a,b)=>b.score-a.score)[0];
+      if(best&&(!current.length||best.score>bestCurrent+0.8)){
+        applyItem(g,id,card.uid,best.i);return true;
+      }
     }
   }
   return false;

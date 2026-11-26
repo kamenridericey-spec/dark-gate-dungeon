@@ -30,6 +30,10 @@ body{background:radial-gradient(ellipse at 50% 31%,#3d3333,#211f25 60%,#17171d)}
 .tokens{z-index:3}
 .door.unopened{background:#83dbcf}
 .door.wall{background:#8b7c73}
+.magic-door{position:absolute;z-index:4;box-sizing:border-box;border:2px solid #efd8ff;border-radius:50%;background:#6e478c;box-shadow:0 0 6px #d9a5ff}
+.magic-door.d0,.magic-door.d2{width:25%;height:10px;left:37.5%}
+.magic-door.d1,.magic-door.d3{height:25%;width:10px;top:37.5%}
+.magic-door.d0{top:-8px}.magic-door.d1{right:-8px}.magic-door.d2{bottom:-8px}.magic-door.d3{left:-8px}
 #signal{margin-top:.38rem;margin-bottom:.36rem;color:#dfcdb3}
 #objective-rack{width:min(100%,65vh,580px);display:grid;grid-template-columns:auto 1fr;gap:.75rem;background:#302630;border:1px solid #846c58;border-radius:9px;padding:.62rem .75rem;color:#efdfbe}
 .objective-title{font-size:.76rem;color:#dac098;margin-bottom:.25rem;font-weight:750}

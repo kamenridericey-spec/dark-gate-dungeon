@@ -1,5 +1,5 @@
-import {Game} from './engine.mjs?p=3';
-import {aiStep} from './ai.mjs?p=3';
+import {Game} from './engine.mjs?p=4';
+import {aiStep} from './ai.mjs?p=4';
 export function allocations(players,guardOwner){
   const list=players.map(p=>[[p.id,2]]);
   for(let i=0;i<players.length;i++)for(let j=i+1;j<players.length;j++)list.push([[players[i].id,1],[players[j].id,1]]);

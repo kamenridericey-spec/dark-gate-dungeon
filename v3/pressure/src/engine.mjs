@@ -1,5 +1,5 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?p=3';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?p=3';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?p=4';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?p=4';
 
 import {patternLabels} from './table-copy-ui.mjs';
 

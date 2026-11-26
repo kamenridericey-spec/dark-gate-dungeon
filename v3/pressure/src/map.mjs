@@ -23,14 +23,14 @@ export function createMap(shuffle) {
   }
   return {rooms,start};
 }
-export function hasDoor(room,d){return room.doors.includes(d)||Boolean(room.breachDoors?.includes(d));}
+export function hasDoor(room,d){return room.doors.includes(d)||Boolean(room.breachDoors?.includes(d)||room.magicDoors?.includes(d));}
 export function blockedDoor(rooms,id,d){
   const to=neighbor(id,d);
   return to===null||(rooms[to].state!=='covered'&&!hasDoor(rooms[to],opposite(d)));
 }
 export function connected(rooms,id,d){
   const to=neighbor(id,d);
-  return to!==null && hasDoor(rooms[id],d) && hasDoor(rooms[to],opposite(d));
+  return to!==null && rooms[id].state!=='covered' && rooms[to].state!=='covered' && hasDoor(rooms[id],d) && hasDoor(rooms[to],opposite(d));
 }
 export function reachable(rooms,id){
   const found=new Set([id]), queue=[id];
@@ -52,7 +52,8 @@ export function orientations(rooms,id,entry){
   for(const rotation of DIRS){
     const doors=rooms[id].shape.map(d=>(d+rotation)%4).sort();
     if(!doors.includes(entry)) continue;
-    const viable=doors.filter(d=>{
+    const exits=[...new Set([...doors,...(rooms[id].magicDoors??[])])].sort();
+    const viable=exits.filter(d=>{
       return d===entry || !blockedDoor(rooms,id,d);
     });
     if(!choices.has(doors.join())) choices.set(doors.join(),{rotation,doors,viable});

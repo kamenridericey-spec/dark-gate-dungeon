@@ -1,4 +1,5 @@
-import {ROLES} from './rules.mjs?p=3';
+import {ROLES} from './rules.mjs?p=4';
+import {DIRS,neighbor,opposite,connected,hasDoor} from './map.mjs?p=4';
 
 const windows = {
   action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
@@ -11,6 +12,12 @@ export function itemTargets(g,id,item){
   if(!win||!h.soul||g.winner||!allowed.includes(win))return [];
   if(e?!e.party.includes(id)&&!(h.state==='explored'&&samePlace(h,g.buyer)):id!==g.turn)return [];
   if(fx==='sprint')return g.reachable(h.pos).filter(p=>p!==h.pos).map(p=>({arg:p,label:`房间 ${p+1}`}));
+  if(fx==='magicDoor')return DIRS.flatMap(direction=>{
+    const to=neighbor(h.pos,direction);
+    if(to===null||connected(g.rooms,h.pos,direction))return [];
+    if(g.rooms[to].state==='covered'&&hasDoor(g.rooms[h.pos],direction))return [];
+    return [{arg:to,direction,label:`在 ${h.pos+1} 与 ${to+1} 号房之间开门`}];
+  });
   if(fx==='insight')return g.slots.flatMap((s,i)=>s&&!s.open?[{arg:i,label:`亮出这张 ${s.card.tier} 级牌`}]:[]);
   if(fx==='peek')return g.goods.length?[{label:'查看堆顶'}]:[];
   if(fx==='transform')return ROLES.filter(r=>r!==h.specialty).map(r=>({arg:r,label:r}));
@@ -36,6 +43,13 @@ export function applyItem(g,id,uid,index){
   const arg=choice.arg;
   switch(item.effect){
     case 'sprint':{const from=h.pos;g.move(id,arg);g.attach();g.note(`${h.name} 疾跑 ${from+1} → ${arg+1}`);break;}
+    case 'magicDoor':{
+      const direction=choice.direction;
+      (g.rooms[h.pos].magicDoors??=[]).push(direction);
+      (g.rooms[arg].magicDoors??=[]).push(opposite(direction));
+      g.note(`墙上冒出了一扇门！${h.pos+1} 号房 ↔ ${arg+1} 号房。`);
+      break;
+    }
     case 'insight':g.slots[arg].open=true;g.note(`亮牌：「${g.slots[arg].card.name}」还留在原位。`);break;
     case 'peek':g.note(`货堆最上面是「${g.goods[0].name}」。`);break;
     case 'transform':h.specialty=arg;break;

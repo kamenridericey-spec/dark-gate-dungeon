@@ -415,6 +415,48 @@
         "检定前"
       ],
       "text": "替本场出手的人挡伤 2。"
+    },
+    {
+      "id": "TRAVEL-FEATHER-I",
+      "tier": 1,
+      "name": "飞毛腿羽毛",
+      "equipment": false,
+      "timing": "自由时机",
+      "effect": "sprint",
+      "text": "沿走过的门跑到另一间已开的房。免费走这趟，本轮行动次数照旧。",
+      "windows": [
+        "行动前"
+      ],
+      "target": "冒险者与合法已探索房间",
+      "implementedInV2": true,
+      "originalKind": "道具",
+      "inventoryType": "unified"
+    },
+    {
+      "id": "TRAVEL-FEATHER-II",
+      "tier": 2,
+      "name": "飞毛腿羽毛",
+      "equipment": false,
+      "timing": "自由时机",
+      "effect": "sprint",
+      "text": "沿走过的门跑到另一间已开的房。免费走这趟，本轮行动次数照旧。",
+      "windows": [
+        "行动前"
+      ],
+      "target": "冒险者与合法已探索房间",
+      "implementedInV2": true,
+      "originalKind": "道具",
+      "inventoryType": "unified"
+    },
+    {
+      "id": "TRAVEL-CIRCLE-II",
+      "tier": 2,
+      "name": "魔法圈",
+      "effect": "magicDoor",
+      "windows": [
+        "行动前"
+      ],
+      "text": "在你这间房和隔壁房之间放一枚门标记，打通这面墙。门一直留着。新房照常探索。"
     }
   ],
   "loot": {

@@ -1,9 +1,9 @@
-import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs?p=3';
-import {applyItem,itemTargets} from './items.mjs?p=3';
-import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?p=3';
-import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs?p=3';
-import {diceMarkup,animateDice} from './dice.mjs?p=3';
-import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?p=3';
+import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs?p=4';
+import {applyItem,itemTargets} from './items.mjs?p=4';
+import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?p=4';
+import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs?p=4';
+import {diceMarkup,animateDice} from './dice.mjs?p=4';
+import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?p=4';
 
 import {patternLabels,stamp,describeEffect,highlightItem,timingText,offerPrice,outcome,offerTerms,patternBonus,keyword} from './table-copy-ui.mjs';
 
@@ -16,6 +16,7 @@ const patternName=p=>patternLabels[PATTERNS.indexOf(p)]??'入口';
 const pattern=p=>stamp(PATTERNS.indexOf(p));
 const localize=text=>text.replace(/条纹|方格|点阵/g,patternName);
 const button=(label,act,value='',style='',disabled=false,tip='')=>`<button class="${style}" data-act="${act}" data-v="${escape(value)}"${disabled?' disabled':''}${tip?` title="${escape(tip)}" aria-label="${escape(tip)}"`:''}>${label}</button>`;
+const mapItem=card=>['sprint','magicDoor'].includes(card?.effect);
 let actionKey='', game, data, human='party', hidden=false, cover='', tool=null, selected=new Set(), dest=null, cityPicks=new Set(), cityPattern=null, timer=null, aiRun=0, feedback=null, aiRecords=[], aiDice=null, diceBusy=false, skipFeedback=false, orientationDraft=null, animateTile=false, observedMonster=null;
 const showMenu=()=>modal('暗门地牢',`<div class="start-picks">${button(icon('▲','冒险者')+'<strong>冒险者</strong><small>带三人进地牢，找齐 5 枚碎片</small>','choose-side','party',human==='party'?'picked':'')}${button(icon('♜','城主')+'<strong>城主</strong><small>布机关、埋牌，把迷宫升到 V 级</small>','choose-side','city',human==='city'?'picked':'')}</div>`,button('开始对局','start','','primary'),false,'挑一边坐下，另一边由电脑接手');
 function modal(title,body,buttons='',fold=true,kicker=''){
@@ -103,7 +104,7 @@ function updateMap(){
   const canAct=human==='party'&&g.phase==='action';
   const explore=canAct&&g.slots.some(Boolean)?g.targets():[];
   const travel=canAct?g.travelTargets():[];
-  const moving=cover==='mapTool'&&tool?.card.effect==='sprint'?new Set(tool.options.map(o=>o.arg)):null;
+  const moving=cover==='mapTool'&&mapItem(tool?.card)?new Set(tool.options.map(o=>o.arg)):null;
   $('map').innerHTML=g.rooms.map(r=>{
     const step=explore.find(t=>t.to===r.id);
     const accessible=moving?moving.has(r.id):step||travel.includes(r.id);
@@ -114,18 +115,26 @@ function updateMap(){
       const color=isTurn?doorState(g,r.id,d,e.entry):connected(g.rooms,r.id,d)?'linked':to!==null&&g.rooms[to].state==='covered'?'unopened':'wall';
       return `<i class="door d${d} ${color} ${r.breachDoors?.includes(d)?'breached':''}" title="${r.breachDoors?.includes(d)?'破墙通道':color==='linked'?'已连通':color==='unopened'?'通往未探索房':'门对面是墙或边界'}" aria-hidden="true"></i>`;
     }).join('');
+    const magicDoors=r.state==='covered'?'':(r.magicDoors??[]).map(d=>{
+      const to=neighbor(r.id,d);
+      if(g.rooms[to].state!=='covered'&&r.id>to)return '';
+      return '<span class="magic-door d'+d+'" role="img" aria-label="魔法门" title="魔法门 · '+(r.id+1)+' 号房与 '+(to+1)+' 号房"></span>';
+    }).join('');
     const tokens=g.heroes.filter(h=>h.pos===r.id).map(h=>{
       const eligible=canAct&&g.partyOptions().includes(h.id)&&h.id!==g.turn;
       return `<button class="token t${h.id} ${selected.has(h.id)&&canAct?'picked':''}" data-act="${eligible?'team':'token'}" data-v="${moving?r.id:h.id}" title="${escape(h.name+' · '+(eligible?'加入或退出这次行动':h.specialty))}" aria-label="${escape(h.name)}">${h.soul?glyph[h.specialty]:'†'}</button>`;
     }).join('');
     return `<div class="room ${r.state} ${r.pattern?'pattern p'+PATTERNS.indexOf(r.pattern):'entrance'} ${accessible?'reachable':''} ${dest===r.id?'selected':''} ${e?.to===r.id?'current-room':''} ${isTurn?'rotating-focus':''} ${isTurn&&!draft.legal?'rotation-invalid':''} ${recent?.to===r.id?'recent-turn':''} ${r.state==='covered'&&needed.includes(r.pattern)?'task-target':''}">
-    <span class="tile-face ${isTurn&&animateTile?'tile-turn':''}">${doors}</span>
+    <span class="tile-face ${isTurn&&animateTile?'tile-turn':''}">${doors}</span>${magicDoors}
     <button class="room-button" data-act="${isTurn?'rotate-preview':'room'}" data-v="${r.id}" title="${escape(`${status}${r.pattern?' · '+patternName(r.pattern):''}${step?.breach?' · 可破墙':''}`)}" aria-label="${escape(`房间 ${r.id+1} ${status} ${r.pattern?patternName(r.pattern):''}`)}">${r.id===g.start?'⌂':pattern(r.pattern)}</button><div class="tokens">${tokens}</div>
     ${step?.breach?'<span class="breach" title="全队没有其他可达新门">↗</span>':''}</div>`;
   }).join('');
   const h=g.actor;
   let controls='';
-  if(cover==='mapTool')controls=button('取消','close')+badge(icon('↗','疾跑')+' 选择高亮房间','疾跑不耗行动');
+  if(cover==='mapTool'){
+    const magic=tool.card.effect==='magicDoor';
+    controls=button('取消','close')+badge(icon(magic?'◌':'↗',tool.card.name)+' '+(magic?'点隔壁的高亮房，放一枚门标记':'点想去的高亮房'),'使用道具不花行动');
+  }
   else if(turning){
     const boardOption=rotationDifference(e.orientations);
     controls='<div class="turn-tools"><strong>'+(e.orientCity?'城主':'冒险者')+'旋转 · 房 '+(e.to+1)+'</strong>'+
@@ -184,7 +193,7 @@ function scene(){
   if(tool){
     const {card,id,options}=tool;
     return modal(card.name,cardRow(itemCard(card))+`<p class="hint">${g.heroes[id].name} · ${options.length?'选好目标就能用':'现在用不了，看看牌底的时机。'}</p>`,
-      (card.effect==='sprint'&&options.length?button('在地图选择','map-item','','primary'):options.map((opt,i)=>button(escape(opt.label),'use-item',i,'primary')).join(''))+button('返回','close'),false);
+      (mapItem(card)&&options.length?button('在地图选择','map-item','','primary'):options.map((opt,i)=>button(escape(opt.label),'use-item',i,'primary')).join(''))+button('返回','close'),false);
   }
   if(!g)return showMenu();
   if(feedback&&!hidden){
@@ -313,7 +322,7 @@ function handle(action,value){
   aiRun=0;
   if(cover==='mapTool'&&['room','team','token'].includes(action)){
     const found=tool.options.findIndex(o=>o.arg===index);
-    if(found<0){toast('请选择高亮的已探索房间');return;}
+    if(found<0){toast('请选择高亮的房间');return;}
     applyItem(game,tool.id,tool.card.uid,found);game.trace.push({action:'use-item',item:tool.card.name,target:index});
     cover='';tool=null;dest=null;selected=new Set([game.turn]);after(before);return;
   }
@@ -327,7 +336,7 @@ function handle(action,value){
   }
   if(action==='pattern'){cityPattern=value;render();return;}
   if(action==='city-pick'){if(cityPicks.has(index))cityPicks.delete(index);else cityPicks.add(index);render();return;}
-  if(action==='map-item'&&tool?.card.effect==='sprint'&&tool.options.length){cover='mapTool';render();return;}
+  if(action==='map-item'&&mapItem(tool?.card)&&tool.options.length){cover='mapTool';render();return;}
   const actions={
     upgrade:()=>game.upgrade(),deploy:()=>game.prepare(cityPattern,[...cityPicks]),bearer:()=>game.bearer(index),
     explore:()=>game.explore(dest,[...selected],game.turn),travel:()=>game.travel(dest),wait:()=>game.wait(),
