@@ -1,5 +1,9 @@
-import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?v=093';
-import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?v=093';
+import {createMap,frontiers,reachable,orientations,opposite,PATTERNS,hasDoor} from './map.mjs?p=3';
+import {VERSION,ROLES,COSTS,MAX_SOUL,CAPACITY,WIN_FRAGMENTS,tier,recordPattern,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL} from './rules.mjs?p=3';
+
+import {patternLabels} from './table-copy-ui.mjs';
+
+const stampLabel=pattern=>patternLabels[PATTERNS.indexOf(pattern)];
 
 export class Game {
   constructor(data,seed=Date.now()){
@@ -15,7 +19,7 @@ export class Game {
     this.unlock(1); this.hand=this.drawEvents(6);
     const startingItem=this.drawGoods(1)[0];
     if(startingItem) this.heroes[1].hand.push(startingItem);
-    this.phase='city'; this.note('入口已打开。城主布置第一轮。');
+    this.phase='city'; this.note('入口开了。城主，先布机关。');
   }
   random(){this.randomState=(Math.imul(this.randomState,1664525)+1013904223)>>>0;return this.randomState/4294967296;}
   shuffle(list){const result=[...list];for(let i=result.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
@@ -26,12 +30,12 @@ export class Game {
     const key=tier(level), encounters=this.data.encounters.filter(c=>c.tier===key), goods=this.data.items.cards.filter(c=>c.tier===level), monsters=this.data.monsters[key];
     this.events=this.shuffle([...this.events,...encounters]); this.goods=this.shuffle([...this.goods,...goods.map(c=>this.unique(c))]);
     this.monsters[key]=this.shuffle(monsters);
-    if(level>1)this.note(`${key}级解锁：${encounters.length}张遭遇（DC${encounters[0].dc}）、${goods.length}张普通物资、${monsters.length}只怪物。${level===3?'解锁怪物碎片。':''}`);
+    if(level>1)this.note(`${key} 级牌来了：${encounters.length} 张遭遇、${goods.length} 件物品、${monsters.length} 只怪物。${level===3?'现在有些怪物也会掉碎片。':''}`);
   }
   draw(stack,discard,n,label){
     const cards=[];
     while(cards.length<n){
-      if(!stack.length&&discard.length){stack.push(...this.shuffle(discard.splice(0)));this.note(`${label}抽堆耗尽，回洗公开弃牌。`);}
+      if(!stack.length&&discard.length){stack.push(...this.shuffle(discard.splice(0)));this.note(`${label}牌抽完了，把弃牌洗回去。`);}
       if(!stack.length)break;
       cards.push(stack.shift());
     }
@@ -50,13 +54,13 @@ export class Game {
     this.citySoul-=COSTS[this.level-1];this.upgraded=true;this.upgradeDue=null;this.level++;
     if(this.level===2)this.metrics.firstUpgradeRound=this.round;
     if(this.level===3)this.metrics.thirdTierRound=this.round;
-    this.note(`城主升至${tier(this.level)}级。`);
+    this.note(`迷宫升到 ${tier(this.level)} 级了！`);
     if(this.level===CITY_WIN_LEVEL){this.end('城主',`升至 ${tier(CITY_WIN_LEVEL)} 级`);return;}
     this.unlock(this.level);
     const newTierIndex=this.events.findIndex(card=>card.tier===tier(this.level));
     const extra=newTierIndex<0?undefined:this.events.splice(newTierIndex,1)[0];
     if(!extra)return;
-    this.hand.push(extra); this.note('升级额外摸 1 张新等级遭遇。');
+    this.hand.push(extra); this.note('城主多摸了 1 张新等级的牌。');
     if(this.hand.length>6)this.choose('升级换牌','city',this.hand.map(c=>({label:c.name,card:c})),i=>{
       this.events.push(this.hand.splice(i,1)[0]); this.phase='city';
     });
@@ -66,11 +70,11 @@ export class Game {
     this.assert(!this.mustUpgrade,'上轮已延后开门，本轮须先升级迷宫');
     const amount=Math.min(this.need,this.hand.length);
     this.assert(indices.length===amount&&new Set(indices).size===amount&&indices.every(i=>this.hand[i]),'请选择足量且不同的遭遇');
-    if(this.level<3&&this.canUpgrade){this.upgradeDue=this.level;this.note('本轮已延后升级，下个城主回合须解锁新等级。');}
+    if(this.level<3&&this.canUpgrade){this.upgradeDue=this.level;this.note('城主把升级留到下轮。下轮开门前必须先升。');}
     for(const i of indices)this.slots[this.slots.indexOf(null)]={card:this.hand[i],open:false};
     this.hand=this.hand.filter((_,i)=>!indices.includes(i));
     this.pattern=pattern;this.revealed=false;this.excluded=new Set();this.metrics.cityTurns++;
-    this.phase='action';this.turn=0;this.note('城主已布置遭遇，机关已暗置。');
+    this.phase='action';this.turn=0;this.note('城主埋好牌了。冒险者，该你们开门了。');
   }
   income(kind){
     const source={round:'大轮结束',advantage:'城主优势',trade:'实际成交'}[kind];
@@ -87,7 +91,7 @@ export class Game {
     for(const h of this.heroes){h.state='ready';h.specialty=h.role;}
     const n=Math.min(this.need,Math.max(0,5-this.hand.length));
     const cards=this.drawEvents(n);this.hand.push(...cards);
-    this.note(`第 ${this.round} 轮，城主常规摸 ${cards.length} 张。`);
+    this.note(`第 ${this.round} 轮，城主摸了 ${cards.length} 张。`);
     this.phase='city';
   }
   reachable(id){return reachable(this.rooms,id);}
@@ -126,22 +130,22 @@ export class Game {
   reveal(slot){
     this.assert(this.phase==='door'&&this.slots[slot],'没有可揭开的遭遇');
     const e=this.encounter,room=this.rooms[e.to],direction=opposite(e.entry);
-    if(!hasDoor(this.rooms[e.from],direction)){(this.rooms[e.from].breachDoors??=[]).push(direction);this.metrics.breaches++;this.note('全队无可达新门，本场破墙进入。');}
+    if(!hasDoor(this.rooms[e.from],direction)){(this.rooms[e.from].breachDoors??=[]).push(direction);this.metrics.breaches++;this.note('找不到新门，只好从墙上凿个口子！');}
     room.state='pending';room.doors=[e.entry];
     for(const id of e.party){this.move(id,e.to);this.heroes[id].state='explored';}
     this.attach();e.hit=room.pattern===this.pattern;
-    if(e.hit){this.revealed=true;this.note(`命中 ${room.pattern} 机关。`);}else{this.excluded.add(room.pattern);this.note(`${room.pattern} 未触发机关。`);}
+    if(e.hit){this.revealed=true;this.note(`踩中机关了！城主押的是${stampLabel(room.pattern)}。`);}else{this.excluded.add(room.pattern);this.note(`踩上${stampLabel(room.pattern)}纹地砖，机关没响。`);}
     e.card=this.slots[slot].card;this.slots[slot]=null;this.metrics.rooms++;if(e.party.length>1)this.metrics.group++;
-    this.note(`${e.party.map(i=>this.heroes[i].name).join('、')} 进入 ${e.to+1}：${e.card.name}`);
+    this.note(`${e.party.map(i=>this.heroes[i].name).join('、')}推开了 ${e.to+1} 号房的门 · ${e.card.name}`);
     this.phase='revealed';
   }
   continueEncounter(){
     this.assert(this.phase==='revealed','尚未揭晓');
     const e=this.encounter;
-    if(e.card.kind==='战斗'){e.monster=this.drawMonster(e.card.monsterDraw.tier);this.assert(e.monster,'怪物堆无可用牌');this.note(`遭遇怪物：${e.monster.name}`);this.phase='monster';}
+    if(e.card.kind==='战斗'){e.monster=this.drawMonster(e.card.monsterDraw.tier);this.assert(e.monster,'怪物堆无可用牌');this.note(`开打！${e.monster.name}出现了。`);this.phase='monster';}
     else if(e.card.kind==='交易'){
       this.metrics.tradeOffers++;
-      if(!this.goods.length&&!this.goodsDiscard.length){this.note('物资不足，交易结束。');this.finishCheck();}
+      if(!this.goods.length&&!this.goodsDiscard.length){this.note('店里没货了，这单做不成。');this.finishCheck();}
       else this.phase='trade';
     }else this.phase='check';
   }
@@ -149,7 +153,7 @@ export class Game {
   acceptTrade(yes){
     this.assert(this.phase==='trade','没有报价');
     if(yes){this.metrics.tradeAccepted++;this.phase='check';return;}
-    this.note('拒绝报价。');this.finishCheck();
+    this.note('看了眼价格，转身走了。');this.finishCheck();
   }
   strength(){const e=this.encounter;return Number(this.buyer.specialty===e.card.attribute)-Number(e.hit)+e.delta;}
   mode(){return this.encounter.normal?0:Math.sign(this.strength());}
@@ -163,7 +167,7 @@ export class Game {
   confirm(){
     this.assert(this.phase==='rolled','尚未掷骰');
     const e=this.encounter;e.success=this.value()>=e.card.dc;this.metrics.checks++;if(e.success)this.metrics.success++;
-    this.note(`取 ${this.value()} / DC${e.card.dc} · ${e.success?'成功':'失败'}`);
+    this.note(`掷到 ${this.value()}（要 ${e.card.dc}）· ${e.success?'成功':'失败'}`);
     const outcome=e.success?'success':'failure';
     if(e.card.offer){
       const offer=e.card.offer;
@@ -202,13 +206,13 @@ export class Game {
           if(!targets.length){again();break;}
           e.damage={target:h.id,targets,area,amount:fx.amount,resume:()=>again()};
           this.phase='damage';
-          this.note(area?`${targets.map(id=>this.heroes[id].name).join('、')} 各即将失去 ${fx.amount} 魂。`:`${h.name} 即将失去 ${fx.amount} 魂。`);
+          this.note(area?`${targets.map(id=>this.heroes[id].name).join('、')} 各要掉 ${fx.amount} 魂。`:`${h.name} 要掉 ${fx.amount} 魂。`);
           break;
         }
       case 'discardItem':
-        if(!h.hand.length){this.note(`${h.name} 无物可弃。`);again();break;}
+        if(!h.hand.length){this.note(`${h.name}包里没东西可扔。`);again();break;}
         this.choose('选择弃置物品','party',h.hand.map(item=>({label:item.name,card:item})),i=>{
-          const [item]=h.hand.splice(i,1);this.discard(item);this.note(`${h.name} 弃置 ${item.name}。`);
+          const [item]=h.hand.splice(i,1);this.discard(item);this.note(`${h.name}扔掉了「${item.name}」。`);
           if(fx.amount>1)e.queue.unshift({...fx,amount:fx.amount-1});again();
         });break;
       case 'drawItem':this.awardMany(this.drawGoods(fx.amount),h.id,()=>again());break;
@@ -217,7 +221,7 @@ export class Game {
         if(reward.effect==='fragment'){this.addFragment(reward.amount,e.monster.name);again();break;}
         const item=this.data.items.loot[reward.lootRef];
         if(item&&!this.heroes.some(a=>a.hand.some(c=>c.id===item.id)))this.receive(this.unique({...item,monster:true}),h.id,()=>again());
-        else{this.note('配对素材已被持有。');again();}break;
+        else{this.note('这件战利品已经有人拿着了。');again();}break;
       }
       default:throw new Error(`未知效果：${fx.effect}`);
     }
@@ -237,10 +241,10 @@ export class Game {
     this.attach();if(this.heroes.every(a=>!a.soul)){this.end('城主','全员失魂');return;}
     e.damage=null;resume();
   }
-  heal(id,amount){const h=this.heroes[id],before=h.soul;h.soul=Math.min(h.max,h.soul+amount);this.attach();this.note(`${h.name} 回魂 ${before} → ${h.soul}。`);}
+  heal(id,amount){const h=this.heroes[id],before=h.soul;h.soul=Math.min(h.max,h.soul+amount);this.attach();this.note(`${h.name}的魂：${before} → ${h.soul}。`);}
   discard(item){if(!item.monster)this.goodsDiscard.push(item);}
   awardMany(items,id,done){const item=items.shift();if(!item){done();return;}this.receive(item,id,()=>this.awardMany(items,id,done));}
-  give(item,id){this.heroes[id].hand.push(item);this.note(`${this.heroes[id].name} 获得 ${item.name}。`);}
+  give(item,id){this.heroes[id].hand.push(item);this.note(`${this.heroes[id].name}拿到了「${item.name}」。`);}
   receive(item,id,done){
     const h=this.heroes[id];if(h.hand.length<h.capacity){this.give(item,id);done();return;}
     const options=this.encounter.party.filter(i=>i!==id&&this.heroes[i].soul>0&&this.heroes[i].hand.length<this.heroes[i].capacity)
@@ -270,7 +274,7 @@ export class Game {
     });
   }
   leaveTrade(){
-    this.goods.push(...this.encounter.goods.splice(0));this.note('未成交。');this.finishCheck();
+    this.goods.push(...this.encounter.goods.splice(0));this.note('空手出了店。');this.finishCheck();
   }
   purchase(index){
     this.assert(this.phase==='goods'&&this.encounter.goods[index],'请选择已公开的货物');
@@ -279,8 +283,8 @@ export class Game {
     const item=e.goods[index];
     const complete=(p,id)=>{
       const h=this.buyer;
-      if(p.key==='soul'){const before=h.soul;h.soul-=e.card.offer.cost.amount;this.note(`交易付款 · ${h.name} 魂 ${before} → ${h.soul}。`);}
-      else{const old=h.hand.splice(h.hand.findIndex(c=>String(c.uid)===p.key),1)[0];this.discard(old);this.note(`交易付款 · 交付 ${old.name}。`);}
+      if(p.key==='soul'){const before=h.soul;h.soul-=e.card.offer.cost.amount;this.note(`${h.name}付了 ${e.card.offer.cost.amount} 魂（${before} → ${h.soul}）。`);}
+      else{const old=h.hand.splice(h.hand.findIndex(c=>String(c.uid)===p.key),1)[0];this.discard(old);this.note(`拿「${old.name}」付账。`);}
       e.goods.splice(index,1);this.goods.push(...e.goods.splice(0));this.give(item,id);e.traded=true;this.metrics.trades++;
       e.queue=[...e.card.offer.afterTrade,...this.patternEffects('afterTrade')];this.resolve(()=>this.finishCheck());
     };
@@ -293,7 +297,8 @@ export class Game {
     if(!this.fragments)this.metrics.firstFragmentRound=this.round;
     n=Math.min(n,1,WIN_FRAGMENTS-this.fragments);
     this.fragments+=n;if(source==='共鸣'||source==='巡礼')this.metrics.task+=n;else this.metrics.cardFragments+=n;
-    this.note(`+${n} 碎片 · ${source}（${this.fragments}/${WIN_FRAGMENTS}）`);
+    if(source==='共鸣'||source==='巡礼')this.lastTask={round:this.round,name:source};
+    this.note(`找到 ${n} 枚碎片 · ${source}（${this.fragments}/${WIN_FRAGMENTS}）`);
     if(this.fragments>=WIN_FRAGMENTS)this.end('冒险者','集齐五枚碎片');
   }
   finishCheck(){
@@ -302,7 +307,7 @@ export class Game {
     if(e.success&&(!e.card.offer||e.traded)){
       const next=recordPattern(this.history,this.rooms[e.to].pattern);
       this.history=next.history;
-      this.note(`任务记录：${this.history.join(' · ')||'清空'}。`);
+      if(this.history.length)this.note('脚下纹样记下了：'+this.history.map(stampLabel).join('、')+'。');
       if(next.task)this.addFragment(TASK_REWARD,next.task);
     }
     if(this.winner)return;
@@ -316,7 +321,7 @@ export class Game {
     const chosen=e.orientations[index];const room=this.rooms[e.to];
     this.assert(chosen.doors.length===room.shape.length,'旋转必须保留地砖门数');
     room.state='open';room.doors=chosen.doors;this.lastOrientation={to:room.id,logSize:this.logs.length};
-    this.note(`${e.orientCity?'城主':this.heroes[e.actor].name} 为房间 ${e.to+1} 定向（${chosen.rotation*90}°）。`);
+    this.note(`${e.orientCity?'城主':this.heroes[e.actor].name}转动了 ${e.to+1} 号房（${chosen.rotation*90}°）。`);
     this.metrics.rotations++;if(e.orientCity){this.metrics.cityRotations++;if(new Set(e.orientations.map(o=>o.viable.join())).size>1)this.metrics.meaningfulCityRotations++;}
     this.eventDiscard.push(e.card);if(e.monster)this.monsterDiscard[e.card.tier].push(e.monster);
     this.encounter=null;

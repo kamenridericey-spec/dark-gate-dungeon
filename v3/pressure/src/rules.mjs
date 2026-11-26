@@ -1,4 +1,4 @@
-export const VERSION='0.9.3-pressure.2';
+export const VERSION='0.9.3-pressure.3';
 export const ROLES=['体魄','心智','魅力'];
 export const COSTS=[5,6,7,8];
 export const CITY_SOUL_LIMIT=8;

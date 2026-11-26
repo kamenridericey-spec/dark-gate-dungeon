@@ -7,110 +7,120 @@
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "会打嗝的胃囊",
+        "loot": "蛙肚里的备用骰",
         "lootRef": "MON-I-01"
-      }
+      },
+      "scene": "嗝！一颗骰子从它嘴里弹了出来。"
     },
     {
       "id": "MON-I-02",
-      "name": "反穿蜥",
+      "name": "盾背蜥蜴",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "反穿的鳞片",
+        "loot": "蜥皮盾",
         "lootRef": "MON-I-02"
-      }
+      },
+      "scene": "它见你过来，立刻背过身，把硬鳞片亮给你。"
     },
     {
       "id": "MON-I-03",
-      "name": "报丧眼",
+      "name": "看门眼球",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "唱反调的眼球",
+        "loot": "看门的眼珠",
         "lootRef": "MON-I-03"
-      }
+      },
+      "scene": "门没长腿，眼珠倒是追了过来。"
     },
     {
       "id": "MON-I-04",
-      "name": "借手虫",
+      "name": "六脚甲虫",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "借来的第三只手",
+        "loot": "甲虫盾",
         "lootRef": "MON-I-04"
-      }
+      },
+      "scene": "它把三只脚踩进坑里，剩下三只还在使劲。"
     }
   ],
   "II": [
     {
       "id": "MON-II-01",
-      "name": "弹簧鱿",
+      "name": "弹簧鱿鱼",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "弹簧触须",
+        "loot": "鱿鱼的弹簧盾",
         "lootRef": "MON-II-01"
-      }
+      },
+      "scene": "它把触手压进地缝，嗖的一声弹到你面前。"
     },
     {
       "id": "MON-II-02",
-      "name": "灯笼胃",
+      "name": "发光的灯笼鱼",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "肚里的小太阳",
+        "loot": "鱼油急救包",
         "lootRef": "MON-II-02"
-      }
+      },
+      "scene": "鱼肚里一闪一闪，它刚吃进去的东西还在发亮。"
     },
     {
       "id": "MON-II-03",
-      "name": "假面鹿",
+      "name": "戴面具的青蛙",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "不合脸的面具",
+        "loot": "青蛙面具",
         "lootRef": "MON-II-03"
-      }
+      },
+      "scene": "面具戴反了。它跳出来时，扑的是你背后的墙。"
     },
     {
       "id": "MON-II-04",
-      "name": "吞屑貘",
+      "name": "啃铜的貘",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "吞屑貘的铜牙",
+        "loot": "貘牙盾",
         "lootRef": "MON-II-04"
-      }
+      },
+      "scene": "它咔嚓咬下一截栏杆，嚼得像块饼。"
     }
   ],
   "III": [
     {
       "id": "MON-III-01",
-      "name": "王冠水母",
+      "name": "戴王冠的水母",
       "reward": {
         "effect": "fragment",
         "target": "party",
         "amount": 1
-      }
+      },
+      "scene": "它浮得比你还高。王冠上那枚碎片倒是一眼就能看见。"
     },
     {
       "id": "MON-III-02",
-      "name": "棺材螺",
+      "name": "背棺材的蜗牛",
       "reward": {
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "随身小棺材",
+        "loot": "棺材保命符",
         "lootRef": "MON-III-02"
-      }
+      },
+      "scene": "棺材盖掀起一条缝，一双触角钻了出来。"
     },
     {
       "id": "MON-III-03",
@@ -119,29 +129,32 @@
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "嚼不烂的灯芯",
+        "loot": "兽肚里的二十点骰",
         "lootRef": "MON-III-03"
-      }
+      },
+      "scene": "它一口嚼灭了灯。你还能看见它牙缝里亮着一点。"
     },
     {
       "id": "MON-III-04",
-      "name": "无面铸像",
+      "name": "没脸的石像",
       "reward": {
         "effect": "fragment",
         "target": "party",
         "amount": 1
-      }
+      },
+      "scene": "石像把碎片往胸口一塞，迈出沉沉的一步。"
     }
   ],
   "IV": [
     {
       "id": "MON-IV-01",
-      "name": "碎冠巨像",
+      "name": "戴碎冠的巨像",
       "reward": {
         "effect": "fragment",
         "target": "party",
         "amount": 1
-      }
+      },
+      "scene": "它低头过门，碎王冠还是在门框上蹭了一下。"
     },
     {
       "id": "MON-IV-02",
@@ -150,27 +163,30 @@
         "effect": "monsterLoot",
         "target": "bearer",
         "amount": 1,
-        "loot": "缝门蛛的第二线轴",
+        "loot": "蛛丝镜盾",
         "lootRef": "MON-IV-02"
-      }
+      },
+      "scene": "门缝才缝到一半，它就放下线轴朝你跑来。"
     },
     {
       "id": "MON-IV-03",
-      "name": "核壳兽",
+      "name": "藏碎片的巨龟",
       "reward": {
         "effect": "fragment",
         "target": "party",
         "amount": 1
-      }
+      },
+      "scene": "它缩回壳里。壳上的碎片却还露在外面。"
     },
     {
       "id": "MON-IV-04",
-      "name": "失声钟兽",
+      "name": "哑巴钟怪",
       "reward": {
         "effect": "fragment",
         "target": "party",
         "amount": 1
-      }
+      },
+      "scene": "它使劲甩了一下空钟，掉下来一枚亮晶晶的碎片。"
     }
   ]
 }

@@ -1,64 +1,46 @@
-import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs';
-import {applyItem,itemTargets} from './items.mjs?v=093';
-import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?v=093';
-import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs';
-import {diceMarkup,animateDice} from './dice.mjs?v=093';
-import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?v=093';
+import {PilotGame as Game,pilotStep as aiStep} from './split-game.mjs?p=3';
+import {applyItem,itemTargets} from './items.mjs?p=3';
+import {PATTERNS,connected,blockedDoor,neighbor,DIRS} from './map.mjs?p=3';
+import {taskHint,roomRotation,doorState,rotationDifference,monsterMark} from './table-ui.mjs?p=3';
+import {diceMarkup,animateDice} from './dice.mjs?p=3';
+import {COSTS,ROLES,VERSION,stanceName,TASK_REWARD,CITY_SOUL_LIMIT,CITY_WIN_LEVEL,tier} from './rules.mjs?p=3';
+
+import {patternLabels,stamp,describeEffect,highlightItem,timingText,offerPrice,outcome,offerTerms,patternBonus,keyword} from './table-copy-ui.mjs';
 
 const $=id=>document.getElementById(id);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=(glyph,title)=>`<span class="ico" title="${escape(title)}" aria-label="${escape(title)}" role="img">${glyph}</span>`;
 const badge=(text,title)=>`<span class="badge" title="${escape(title)}">${text}</span>`;
 const glyph={战斗:'⚔',考验:'◇',交易:'⇄',体魄:'▲',心智:'◈',魅力:'✧'};
-const patterns=['圆圈','三角','叉号'];
-const marks=['○','△','×'];
-const patternName=p=>patterns[PATTERNS.indexOf(p)]??'入口';
-const pattern=p=>`<span class="pattern swatch p${PATTERNS.indexOf(p)}" title="${patternName(p)}" aria-label="${patternName(p)}" role="img">${marks[PATTERNS.indexOf(p)]??''}</span>`;
+const patternName=p=>patternLabels[PATTERNS.indexOf(p)]??'入口';
+const pattern=p=>stamp(PATTERNS.indexOf(p));
 const localize=text=>text.replace(/条纹|方格|点阵/g,patternName);
 const button=(label,act,value='',style='',disabled=false,tip='')=>`<button class="${style}" data-act="${act}" data-v="${escape(value)}"${disabled?' disabled':''}${tip?` title="${escape(tip)}" aria-label="${escape(tip)}"`:''}>${label}</button>`;
-const effects={
-  fragment:['◆','全队获得碎片'],drawItem:['▣','抽取普通物资'],heal:['✚','恢复魂'],loseSoul:['−♥','失去魂'],
-  discardItem:['⊘','承担者自选弃置物品'],orientRoom:['♜↻','结算后由城主定向'],monsterReward:['✶','领取怪物牌印出的唯一奖励'],
-  completeOffer:['⇄','可按价格购买一件'],none:['—','无额外损失']
-};
-function describeEffect(effect){
-  if(effect.effect==='loseSoul'&&effect.target==='splitExplorers')return badge(icon('♥','本次探索者分摊')+' 共失 '+effect.amount+' 魂','可由一人承受全部，或由两名同行各承受 1 魂。独行时由自己承受。');
-  const tuple=effects[effect.effect]??['?','未知效果'];
-  const name=effect.effect==='heal'&&effect.target==='explorers'?'本次每名探索者各恢复魂':effect.effect==='loseSoul'&&effect.target==='livingParty'?'全体存活冒险者各失魂':effect.effect==='loseSoul'&&effect.target==='explorers'?'本次探索者各失魂':tuple[1];
-  const showAmount=!['orientRoom','monsterReward','completeOffer','none'].includes(effect.effect);
-  return badge(`${icon(tuple[0],name)}${showAmount?`<b>${effect.amount}</b>`:''}`,`${name}${showAmount?' ×'+effect.amount:''}`);
-}
-const effectsRow=(list)=>list?.map(describeEffect).join('')||badge('—','无额外效果');
-const price=offer=>offer.cost.kind==='soul'?`${icon('♥','支付一魂')} 1`:`${icon('▣','交付一件持有物')} 1`;
 let actionKey='', game, data, human='party', hidden=false, cover='', tool=null, selected=new Set(), dest=null, cityPicks=new Set(), cityPattern=null, timer=null, aiRun=0, feedback=null, aiRecords=[], aiDice=null, diceBusy=false, skipFeedback=false, orientationDraft=null, animateTile=false, observedMonster=null;
-const showMenu=()=>modal('暗门地牢',`<div class="start-picks">${button(icon('▲','冒险者')+'<strong>冒险者</strong><small>带三名角色探索</small>','choose-side','party',human==='party'?'picked':'')}${button(icon('♜','城主')+'<strong>城主</strong><small>部署遭遇与机关</small>','choose-side','city',human==='city'?'picked':'')}</div>`,button('开始对局','start','','primary'),false,'七张生存压力遭遇 · 另一方自动行动');
+const showMenu=()=>modal('暗门地牢',`<div class="start-picks">${button(icon('▲','冒险者')+'<strong>冒险者</strong><small>带三人进地牢，找齐 5 枚碎片</small>','choose-side','party',human==='party'?'picked':'')}${button(icon('♜','城主')+'<strong>城主</strong><small>布机关、埋牌，把迷宫升到 V 级</small>','choose-side','city',human==='city'?'picked':'')}</div>`,button('开始对局','start','','primary'),false,'挑一边坐下，另一边由电脑接手');
 function modal(title,body,buttons='',fold=true,kicker=''){
   return `<div class="scrim"><section class="modal" role="dialog" aria-modal="true" aria-label="${escape(title)}">${fold?button('⌄','hide','','fold',false,'收起，查看地图'):''}${kicker?`<div class="kicker">${escape(kicker)}</div>`:''}<h1>${escape(title)}</h1>${body}${buttons?`<div class="modal-actions">${buttons}</div>`:''}</section></div>`;
 }
-function encounterCard(c,{act='',value='',back=false,chosen=false}={}){
+function encounterCard(c,{act='',value='',back=false,chosen=false,charm=0}={}){
   const attrs=act?`data-act="${act}" data-v="${value}" role="button" tabindex="0"`:'';
   if(back)return `<article class="card back interactive" ${attrs} aria-label="${c.tier}级未揭晓遭遇" title="${c.tier} 级遭遇"><span>遭遇</span><strong>${c.tier}</strong></article>`;
-  const cond=c.patternEffect,offer=c.offer;
-  const aff=cond?`<div class="affinity">${pattern(c.preferredPattern)}<span>${{success:'成功',failure:'失败',afterTrade:'成交后'}[cond.when]}</span>${effectsRow(cond.effects)}</div>`:'';
-  const trade=(result)=>offer?badge(`翻 ${offer.revealByResult[result]} 件 · 可买 1 件`,`检定${result==='success'?'成功':'失败'}后公开 ${offer.revealByResult[result]} 件货，魅力多看一件。付款时最多买一件，也可离开。`):'';
-  return `<article class="card ${act?'interactive':''} ${chosen?'picked':''}" ${attrs}><small>${c.tier}</small><h2>${escape(c.name)}</h2>
-    <div class="card-type">${icon(glyph[c.kind],c.kind)} ${c.kind}</div>
-    <div class="badges">${badge(icon(glyph[c.attribute],c.attribute)+' '+c.attribute,`${c.attribute}专长匹配给一项优势来源`)}${badge('DC '+c.dc,'最低成功骰值')}</div>
-    <p>${escape(c.scene)}</p><div class="outcome good"><span>成功</span>${trade('success')}${effectsRow(c.success.filter(f=>f.effect!=='completeOffer'))}</div>
-    <div class="outcome bad"><span>失败</span>${trade('failure')}${effectsRow(c.failure)}</div>
-    ${offer?`<div class="affinity"><span>价格</span>${price(offer)}${offer.afterTrade.length?`<span>成交后</span>${effectsRow(offer.afterTrade)}`:''}</div>`:''}${aff}</article>`;
+  const scene=escape(c.scene);
+  return `<article class="card encounter-face ${act?'interactive':''} ${chosen?'picked':''}" ${attrs}><small>${c.tier} 级</small><h2>${escape(c.name)}</h2>
+    <div class="card-type">${icon(glyph[c.kind],c.kind)} ${c.kind} · ${badge(icon(glyph[c.attribute],c.attribute)+' '+c.attribute,`专长是${c.attribute}的人出手，冒险者多一个优势。`)}${badge(c.dc+'+',`掷出 ${c.dc} 或更高就成功。`)}</div>
+    <p class="card-scene">${scene}</p><div class="card-result">${outcome(c,'success',charm)}${outcome(c,'failure',charm)}
+    ${c.offer?offerTerms(c.offer):''}${patternBonus(c,pattern)}</div></article>`;
 }
 function itemCard(c,act='',value='',disabled=false){
   return `<article class="card item-card ${act&&!disabled?'interactive':''}" ${act&&!disabled?`data-act="${act}" data-v="${value}" role="button" tabindex="0"`:''}>
-  <small>${c.monster?'素材':'物资'}</small><h2>${escape(c.name)}</h2><div class="card-type">${icon(c.monster?'✶':'▣',c.monster?'怪物素材':'普通物资')}</div>
-  <p>${escape(c.text)}</p><footer>${escape((c.windows??[c.timing]).join(' · '))}</footer></article>`;
+  <small>${c.monster?'战利品':'物品'}</small><h2>${escape(c.name)}</h2><div class="card-type">${icon(c.monster?'✶':'▣',c.monster?'怪物掉落的物品':'普通物品')}</div>
+  <p>${highlightItem(c.text,escape)}</p><footer>${escape(timingText(c))}</footer></article>`;
 }
 const monsterArt=monster=>'<svg viewBox="0 0 60 60" aria-hidden="true"><path d="'+monsterMark(monster.id)+'"/></svg>';
 function monsterPacket(card,monster,compact=false){
   if(!monster)return '';
   const reward=monster.reward,item=data.items.loot[reward.lootRef];
   if(compact===true)return '<div class="monster-brief">'+monsterArt(monster)+' <strong>'+escape(monster.name)+'</strong> · '+card.tier+' 级 · '+escape(item?item.name:'碎片 '+reward.amount)+'</div>';
-  const portrait='<article class="card monster-portrait"><small>'+card.tier+' 级怪物</small><h2>'+escape(monster.name)+'</h2><div class="monster-sigil">'+monsterArt(monster)+'</div><div class="outcome good"><span>击败后</span>'+(item?badge('素材','领取右侧配对素材'):describeEffect(reward))+'</div></article>';
+  const portrait='<article class="card monster-portrait"><small>'+card.tier+' 级怪物</small><h2>'+escape(monster.name)+'</h2><div class="monster-sigil">'+monsterArt(monster)+'</div><p class="card-scene">'+escape(monster.scene)+'</p><div class="outcome good"><span>打赢拿</span>'+(item?badge(escape(item.name),'右边是战利品牌。'):describeEffect(reward))+'</div></article>';
   return '<div class="monster-docket">'+(compact==='observed'?'':encounterCard(card))+portrait+(item?itemCard({...item,monster:true}):'')+'</div>';
 }
 const cardRow=content=>`<div class="cards">${content}</div>`;
@@ -74,11 +56,11 @@ function drawObjectives(g){
   const crystals=Array.from({length:5},(_,i)=>'<span class="crystal '+(i<g.fragments?'filled':'')+'" aria-hidden="true">◆</span>').join('');
   const marks=[0,1].map(i=>g.history[i]?pattern(g.history[i]):'<span class="swatch empty-mark" aria-label="未记录">·</span>').join('');
   const next=hint.needed.map(p=>'<span class="last-mark">'+pattern(p)+'</span>').join('');
-  const last=g.logs.findLast(l=>/碎片 · (共鸣|巡礼)/.test(l.text));
+  const last=g.lastTask;
   $('objective-rack').innerHTML=
     '<div class="fragment-bank" title="集齐五枚碎片获胜"><div class="objective-title">冒险者碎片 <strong>'+g.fragments+'/5</strong></div><div class="crystals">'+crystals+'</div></div>'+
-    '<div class="task-track" title="连续三个同纹完成共鸣，三个不同纹完成巡礼。只记录成功探索；交易还必须成交。">'+
-    '<div class="objective-title"><span class="map-meter" title="已进入房间数，不计入口">探索 '+g.metrics.rooms+'/35</span>共鸣 / 巡礼'+(last?' <span class="task-note">· 第 '+last.round+' 轮完成'+(last.text.includes('共鸣')?'共鸣':'巡礼')+'</span>':'')+'</div>'+
+    '<div class="task-track" title="成功开房后记下纹样，交易还要成交。集齐三个同纹是共鸣，三个不同纹是巡礼。各得 1 枚碎片。">'+
+    '<div class="objective-title"><span class="map-meter" title="已进入房间数，不计入口">探索 '+g.metrics.rooms+'/35</span>共鸣 / 巡礼'+(last?' <span class="task-note">· 第 '+last.round+' 轮完成'+last.name+'</span>':'')+'</div>'+
     '<div class="history-line">'+marks+(next?'<span class="task-progress">→ '+next+' <b>◆ +1</b></span>':'<span class="swatch empty-mark" aria-label="待记录">·</span>')+
     '<span class="task-note">'+hint.label+'</span></div></div>';
 }
@@ -89,14 +71,14 @@ function updateBoard(){
   if(!g){for(const key of ['city','heroes','map','controls','signal','objective-rack'])$(key).innerHTML='';return;}
   $('city').innerHTML=`<div class="panel"><div class="section-title">${icon('♜','城主')} 城主 <span>${tier(g.level)}</span></div>
     <div class="stats">${badge(icon('♥','城主魂')+' '+g.citySoul+'/'+(COSTS[g.level-1]??'—'),'城主当前魂／下次升级费用；最多持有 '+CITY_SOUL_LIMIT+' 魂')}
-    ${badge(icon('◷','大轮')+' '+g.round,'当前大轮')}</div>
+    ${badge(icon('◷','大轮')+' '+g.round,'现在是第几轮')}</div>
     ${human==='city'&&g.level<CITY_WIN_LEVEL?button(upgradeLabel(g),'upgrade','','upgrade-action '+(g.canUpgrade?'primary':''),!g.canUpgrade,upgradeTip(g)):''}
     <div class="stats">${badge(`${g.level-1}/${COSTS.length} 次升级`,'依次支付 '+COSTS.join('／')+' 魂升阶；升 V 即胜')}</div>
     <div class="ward"><h3>本轮机关</h3><span>${g.pattern&&(g.revealed||human==='city'||g.excluded.size===2)?pattern(g.pattern)+' '+patternName(g.pattern):'未揭晓'}</span></div>
     ${human==='party'&&g.excluded.size?`<div class="ward excluded"><h3>已排除</h3><span>${[...g.excluded].map(pattern).join('')}</span></div>`:''}
     <h3>牌堆</h3><div class="pile-list">
     ${button('遭遇牌堆 <b>'+g.events.length+'</b>','inspect','events','pile',false,'公共遭遇抽堆。抽空后才洗回公开弃牌。')}
-    ${button('桌面埋牌 <b>'+g.slots.filter(Boolean).length+'</b>','inspect','slots','pile',false,'查看剩余埋牌。冒险者只看可公开的信息。')}
+    ${button('桌上的埋牌 <b>'+g.slots.filter(Boolean).length+'</b>','inspect','slots','pile',false,'查看剩余埋牌。冒险者只看可公开的信息。')}
     ${button('遭遇弃牌 <b>'+g.eventDiscard.length+'</b>','inspect','discard','pile',false,'查看公开弃掉的遭遇牌。')}
     ${human==='city'?button('城主手牌 <b>'+g.hand.length+'</b>','inspect','hand','pile',false,'查看自己的城主手牌。'):badge('城主手牌 '+g.hand.length,'冒险者只能知道城主持牌数量。')}
     ${badge('物资牌堆 '+g.goods.length,'普通物资剩余张数。')}${badge('物资弃牌 '+g.goodsDiscard.length,'已公开弃置的普通物资。')}</div></div>
@@ -125,7 +107,7 @@ function updateMap(){
   $('map').innerHTML=g.rooms.map(r=>{
     const step=explore.find(t=>t.to===r.id);
     const accessible=moving?moving.has(r.id):step||travel.includes(r.id);
-    const status=r.state==='covered'?'未探索':r.state==='pending'?'待定向':r.id===g.start?'入口':'已探索';
+    const status=r.state==='covered'?'未开门':r.state==='pending'?'等着转向':r.id===g.start?'入口':'已开门';
     const isTurn=turning&&e.to===r.id;
     const doors=[...(isTurn?draft.doors:r.doors),...(r.breachDoors??[])].map(d=>{
       const to=neighbor(r.id,d);
@@ -134,7 +116,7 @@ function updateMap(){
     }).join('');
     const tokens=g.heroes.filter(h=>h.pos===r.id).map(h=>{
       const eligible=canAct&&g.partyOptions().includes(h.id)&&h.id!==g.turn;
-      return `<button class="token t${h.id} ${selected.has(h.id)&&canAct?'picked':''}" data-act="${eligible?'team':'token'}" data-v="${moving?r.id:h.id}" title="${escape(h.name+' · '+(eligible?'选入或移出探索小队':h.specialty))}" aria-label="${escape(h.name)}">${h.soul?glyph[h.specialty]:'†'}</button>`;
+      return `<button class="token t${h.id} ${selected.has(h.id)&&canAct?'picked':''}" data-act="${eligible?'team':'token'}" data-v="${moving?r.id:h.id}" title="${escape(h.name+' · '+(eligible?'加入或退出这次行动':h.specialty))}" aria-label="${escape(h.name)}">${h.soul?glyph[h.specialty]:'†'}</button>`;
     }).join('');
     return `<div class="room ${r.state} ${r.pattern?'pattern p'+PATTERNS.indexOf(r.pattern):'entrance'} ${accessible?'reachable':''} ${dest===r.id?'selected':''} ${e?.to===r.id?'current-room':''} ${isTurn?'rotating-focus':''} ${isTurn&&!draft.legal?'rotation-invalid':''} ${recent?.to===r.id?'recent-turn':''} ${r.state==='covered'&&needed.includes(r.pattern)?'task-target':''}">
     <span class="tile-face ${isTurn&&animateTile?'tile-turn':''}">${doors}</span>
@@ -149,8 +131,8 @@ function updateMap(){
     controls='<div class="turn-tools"><strong>'+(e.orientCity?'城主':'冒险者')+'旋转 · 房 '+(e.to+1)+'</strong>'+
       button('↻ 转 90°','rotate-preview','','',false,'在原房间顺时针旋转 90 度')+
       button('确认方向','orient',draft.index,'primary',!draft.legal)+
-      '<small>'+(!draft.legal?'来路未接通，继续旋转':!boardOption?'可选朝向的实际通路相同':'来路必须保持接通')+'</small></div>'+
-      '<div class="route-legend"><span>房 '+(e.from+1)+' → 房 '+(e.to+1)+'</span><span class="gold">━ 已连接</span><span class="cyan">━ 通往盖房</span><span class="gray">━ 墙或边界</span></div>';
+      '<small>'+(!draft.legal?'来路未接通，继续旋转':!boardOption?'两个方向都通往同样的地方':'来路必须保持接通')+'</small></div>'+
+      '<div class="route-legend"><span>房 '+(e.from+1)+' → 房 '+(e.to+1)+'</span><span class="gold">━ 已连接</span><span class="cyan">━ 通往未开的房</span><span class="gray">━ 墙或边界</span></div>';
     animateTile=false;
   }
   else if(feedback)controls=button('查看对方行动结果','show','','primary');
@@ -171,15 +153,23 @@ function toolBar(){
 function stancePanel(){
   const g=game,e=g.encounter,mode=e.mode??g.mode(),affinity=g.buyer.specialty===e.card.attribute;
   const lines=[
-    `<div class="stance-side"><span>${icon('♜','城主')} 城主</span><small title="房间纹样命中城主暗押时增加一个优势来源">${pattern(g.rooms[e.to].pattern)} ${e.hit?'机关命中':'机关未命中'}</small></div>`,
-    `<div class="stance-center"><strong>${stanceName(mode)}</strong><small>${mode<0?'两骰取低':mode>0?'两骰取高':'单骰'}</small>${diceMarkup(diceBusy?e.dice?.map(()=>'?'):e.dice,e.dice&&!diceBusy?g.value():undefined,diceBusy)}</div>`,
-    `<div class="stance-side"><span>${icon(glyph[g.buyer.specialty],g.buyer.specialty)} ${g.buyer.name}</span><small>${g.buyer.specialty} / ${e.card.attribute} · ${affinity?'匹配':'不匹配'}</small></div>`
+    `<div class="stance-side"><span>${icon('♜','城主')} 城主</span><small title="猜中房间纹样，城主就多一个优势。">${pattern(g.rooms[e.to].pattern)} ${e.hit?'踩中机关':'没踩中机关'}</small></div>`,
+    `<div class="stance-center"><strong>${stanceName(mode)}</strong><small>${mode<0?'掷两颗，取小':mode>0?'掷两颗，取大':'掷一颗'}</small>${diceMarkup(diceBusy?e.dice?.map(()=>'?'):e.dice,e.dice&&!diceBusy?g.value():undefined,diceBusy)}</div>`,
+    `<div class="stance-side"><span>${icon(glyph[g.buyer.specialty],g.buyer.specialty)} ${g.buyer.name}</span><small>${g.buyer.specialty} / ${e.card.attribute} · ${affinity?'对上了':'没对上'}</small></div>`
   ];
-  return `<div class="stance">${lines.join('')}</div>${e.normal?'<p class="hint">道具锁定均势</p>':e.delta?`<p class="hint">道具修正 ${e.delta>0?'+':''}${e.delta}</p>`:''}`;
+  return `<div class="stance">${lines.join('')}</div>${e.normal?('<p class="hint">'+keyword('single')+'</p>'):e.delta?`<p class="hint">物品改变优势 ${e.delta>0?'+':''}${e.delta}</p>`:''}`;
 }
 function scene(){
   const g=game,e=g?.encounter;
-  if(cover==='rules')return modal('桌边速览',`<div class="rules-copy"><p><strong>探索</strong>　点相邻盖房，然后选埋牌。遭遇结算后翻地砖，按来路定向。</p><p><strong>共鸣 / 巡礼</strong>　记最近两次有效成功。三种相同或各异得一片，若同时拿到牌面碎片和任务碎片，两份都领。</p><p><strong>骰法</strong>　花纹命中给城主一项优势；专长匹配给承担者一项。城主优势取低，冒险者优势取高。</p><p><strong>交易</strong>　先看报价。成功翻两件，失败翻一件，魅力多一件。实际买到才记成交魂。</p><p><strong>终局</strong>　冒险者五片胜。城主至多持有八魂，准备阶段可付魂升一级，四次费用依次为 ${COSTS.join('／')}。升 V、全员失魂或地图探索耗尽时城主胜。</p></div>`,button('返回','close','','primary'),false);
+  if(cover==='rules')return modal('先看这几条',`<div class="rules-copy">
+    <p><strong>开门</strong>　点相邻的暗房，选谁出手，再翻一张埋牌。处理完牌上的结果就能转地砖，记得接上来路。${keyword('rotate')}</p>
+    <p><strong>走路和组队</strong>　每人轮到时可开一扇门，或沿通路赶到另一间已开的房。同房、这轮还没开过门的队友可以同行，由一人出手。</p>
+    <p><strong>掷骰</strong>　房间纹样被押中，城主多一个优势。出手的人专长对上，冒险者多一个优势。冒险者占优掷两颗取大，城主占优取小，打平掷一颗。</p>
+    <p><strong>买东西</strong>　先看价格，再决定要不要掷骰。成功看 2 件，失败看 1 件，魅力额外看 1 件。最多买 1 件，买了才付钱。掷骰的失败后果照常发生。</p>
+    <p><strong>找碎片</strong>　成功开房后记下纹样，交易还得买到东西。三次同纹是共鸣，三次各不相同是巡礼，各得 1 枚碎片。遭遇和任务同场给碎片时，两边都拿。</p>
+    <p><strong>城主拿魂</strong>　每轮结束拿 1 魂。城主在掷骰时占优，或冒险者真的买了货，结算时各再拿 1 魂。最多留 8 魂。</p>
+    <p><strong>谁先赢</strong>　冒险者集齐 5 枚碎片就赢。城主可在自己回合付魂升级，费用依次是 ${COSTS.join('、')} 魂。升 V、冒险者全倒下，或所有房间都开过，城主获胜。</p>
+  </div>`,button('返回','close','','primary'),false);
   if(cover==='journal')return modal('对局记录',`<div class="journal">${g?.logs.slice().reverse().map(l=>`<p><small>${l.round}</small>${escape(localize(l.text))}</p>`).join('')??''}</div>`,button('导出记录','export')+button('返回','close','','primary'),false);
   if(cover==='reset')return modal('返回开局？','<p class="hint">本局进度将结束，可以先导出记录。</p>',button('继续本局','close')+button('返回开局','reset','','primary'),false);
   if(cover==='mapTool')return '';
@@ -189,52 +179,53 @@ function scene(){
     if(key==='hand')body=cardRow(g.hand.map(c=>encounterCard(c)).join(''));
     if(key==='discard')body=cardRow(g.eventDiscard.slice().reverse().map(c=>encounterCard(c)).join(''));
     if(key==='events')body=`<p class="hint">遭遇抽堆剩 ${g.events.length} 张。抽空后才回洗公开弃牌。</p>`;
-    return modal({slots:'桌面埋牌',discard:'公开遭遇弃牌',events:'公共遭遇堆',hand:'城主手牌'}[key],body||'<p class="hint">暂无牌</p>',button('返回','close','','primary'),false);
+    return modal({slots:'桌上的埋牌',discard:'公开遭遇弃牌',events:'公共遭遇堆',hand:'城主手牌'}[key],body||'<p class="hint">暂无牌</p>',button('返回','close','','primary'),false);
   }
   if(tool){
     const {card,id,options}=tool;
-    return modal(card.name,cardRow(itemCard(card))+`<p class="hint">${g.heroes[id].name} · ${options.length?'选择目标或确认使用':'当前没有合法使用窗口或目标'}</p>`,
+    return modal(card.name,cardRow(itemCard(card))+`<p class="hint">${g.heroes[id].name} · ${options.length?'选好目标就能用':'现在用不了，看看牌底的时机。'}</p>`,
       (card.effect==='sprint'&&options.length?button('在地图选择','map-item','','primary'):options.map((opt,i)=>button(escape(opt.label),'use-item',i,'primary')).join(''))+button('返回','close'),false);
   }
   if(!g)return showMenu();
   if(feedback&&!hidden){
     const dice=feedback.dice;
-    return modal('冒险者行动结果',`${feedback.monster?monsterPacket(feedback.monster.card,feedback.monster.monster,'observed'):''}${dice?`<div class="observed-dice">${badge(stanceName(dice.mode),'本场最终锁定的骰法')}${dice.revealed?diceMarkup(dice.values,dice.chosen):''}</div>`:''}<div class="feedback-list">${feedback.lines.map(text=>`<p>${escape(localize(text))}</p>`).join('')}</div>`,button('继续','feedback-next','','primary')+button('本局跳过结果弹窗','feedback-skip'));
+    return modal('刚才发生了什么',`${feedback.monster?monsterPacket(feedback.monster.card,feedback.monster.monster,'observed'):''}${dice?`<div class="observed-dice">${badge(stanceName(dice.mode),'这次用的骰法')}${dice.revealed?diceMarkup(dice.values,dice.chosen):''}</div>`:''}<div class="feedback-list">${feedback.lines.map(text=>`<p>${escape(localize(text))}</p>`).join('')}</div>`,button('继续','feedback-next','','primary')+button('本局跳过结果弹窗','feedback-skip'));
   }
   if(g.winner)return modal(g.winner+'获胜',`<p class="hint">${escape(g.reason)} · 第 ${g.round} 轮</p>`,button('导出记录','export')+button('新对局','reset','','primary'),false);
   if(hidden||g.side!==human)return '';
   if(g.phase==='city'){
     const count=Math.min(g.need,g.hand.length);
     const patterns=`<div class="pattern-choice">${PATTERNS.map(p=>button(pattern(p)+' '+patternName(p),'pattern',p,cityPattern===p?'picked':'')).join('')}</div>`;
-    return modal('布置地牢',`<div class="city-upgrade">${button(upgradeLabel(g),'upgrade','',g.canUpgrade?'primary':'',!g.canUpgrade)}</div>`+patterns+cardRow(g.hand.map((c,i)=>encounterCard(c,{act:'city-pick',value:i,chosen:cityPicks.has(i)})).join('')),
-      button(`部署 ${cityPicks.size}/${count}`,'deploy','','primary',!cityPattern||cityPicks.size!==count||g.mustUpgrade),true,'暗押一种纹样 · 城主选择全部埋牌');
+    return modal('布置地牢',`<div class="city-upgrade">${button(upgradeLabel(g),'upgrade','',g.canUpgrade?'primary':'',!g.canUpgrade)}</div>`+patterns+'<div class="city-hand">'+cardRow(g.hand.map((c,i)=>encounterCard(c,{act:'city-pick',value:i,chosen:cityPicks.has(i)})).join(''))+'</div>',
+      button(`埋牌 ${cityPicks.size}/${count}`,'deploy','','primary',!cityPattern||cityPicks.size!==count||g.mustUpgrade),true,'选一个纹样设机关，再挑牌填满空位');
   }
   if(g.phase==='door'){
     const choices=`<div class="bearers">${e.party.map(i=>button(icon(glyph[g.heroes[i].specialty],g.heroes[i].specialty)+' '+g.heroes[i].name,'bearer',i,e.bearer===i?'picked':'')).join('')}</div>`;
     return modal('开门前',choices+cardRow(g.slots.map((s,i)=>s?encounterCard(s.card,{act:'reveal',value:i,back:!s.open}):'').join(''))+toolBar(),'',
-      true,patternName(g.rooms[e.to].pattern)+' · 确认承担者并选一张遭遇');
+      true,patternName(g.rooms[e.to].pattern)+' · 选谁出手，再翻一张牌');
   }
-  if(g.phase==='revealed')return modal('遭遇揭晓',cardRow(encounterCard(e.card))+toolBar(),button(e.card.kind==='战斗'?'抽出怪物':'继续','continue','','primary'));
-  if(g.phase==='monster')return modal('战斗',monsterPacket(e.card,e.monster),button('准备检定','monster','','primary'));
+  if(g.phase==='revealed')return modal({战斗:'门后有动静！',考验:'想办法过去',交易:'有人做生意'}[e.card.kind],cardRow(encounterCard(e.card))+toolBar(),button(e.card.kind==='战斗'?'看看是什么怪物':'继续','continue','','primary'));
+  if(g.phase==='monster')return modal('怪物来了！',monsterPacket(e.card,e.monster),button('迎战','monster','','primary'));
   if(g.phase==='trade'){
     const o=e.card.offer,bonus=g.buyer.specialty==='魅力'?o.charmExtraReveal:0;
-    return modal('商人报价',cardRow(encounterCard(e.card))+`<div class="offer-line">${badge(price(o),'成交才付款')}${badge(`成功翻 ${o.revealByResult.success+bonus} 件`,'成功后货物候选与购买上限')}${badge(`失败翻 ${o.revealByResult.failure+bonus} 件`,'失败后货物候选；另执行牌上罚则')}</div>`,button('离开','trade','no')+button('接受检定','trade','yes','primary'));
+    return modal('先问问价',cardRow(encounterCard(e.card,{charm:bonus}))+(bonus?'<p class="hint">魅力出手，多看 1 件。</p>':'')+
+      '<p class="hint">掷骰后就会结算牌上的结果，最后可以不买。</p>',button('直接走','trade','no')+button('掷骰看货','trade','yes','primary'));
   }
   if(g.phase==='check'||g.phase==='rolled')return modal(e.card.kind+'检定',monsterPacket(e.card,e.monster,true)+stancePanel()+toolBar(),
-    g.phase==='check'?button('掷骰','roll','','primary'):button(` ${diceBusy?'掷骰中…':('取 '+g.value()+' · '+(g.value()>=e.card.dc?'成功':'失败'))}`,'resolve','','primary',diceBusy),true,e.card.name+' · DC'+e.card.dc);
+    g.phase==='check'?button('掷骰','roll','','primary'):button(` ${diceBusy?'掷骰中…':('取 '+g.value()+' · '+(g.value()>=e.card.dc?'成功':'失败'))}`,'resolve','','primary',diceBusy),true,e.card.name+' · 掷到 '+e.card.dc+' 就过关');
   if(g.phase==='damage'&&e.damage.parts){
     const costs=e.damage.parts.map(([id,amount])=>badge(escape(g.heroes[id].name)+' −'+amount+' 魂','确认分配前的原始损失')).join('');
-    return modal('确认分摊',`<div class="offer-line">${costs}</div>`+toolBar(),button('承受伤害','damage','','primary'));
+    return modal('一起扛这一下',`<div class="offer-line">${costs}</div>`+toolBar(),button('确认掉魂','damage','','primary'));
   }
-  if(g.phase==='damage')return modal('即将失魂',`<div class="damage">${e.damage.area?e.damage.targets.map(id=>g.heroes[id].name).join('、')+' 各':g.heroes[e.damage.target].name} ${icon('−♥','待执行的失魂')}${e.damage.amount}</div>`+toolBar(),button('承受伤害','damage','','primary'));
+  if(g.phase==='damage')return modal('要掉魂了！',`<div class="damage">${e.damage.area?e.damage.targets.map(id=>g.heroes[id].name).join('、')+' 各':g.heroes[e.damage.target].name} ${icon('−♥','这一击会掉多少魂')}${e.damage.amount}</div>`+toolBar(),button('确认掉魂','damage','','primary'));
   if(g.phase==='goods'){
     const possible=g.paymentOptions().some(p=>g.recipients(p.key).length);
-    return modal('选择货物',`<div class="offer-line">${badge(price(e.card.offer),'选择购买时才支付')}${badge(e.charm?'✧ 魅力':'普通报价',e.charm?'多展示一件':'按检定结果展示货物')}</div>`+
-      cardRow(e.goods.map((c,i)=>itemCard(c,'buy',i,!possible)).join(''))+(!possible?'<p class="hint">没有合法付款或接收位置</p>':''),button('不购买','leave','','primary'),true,e.success?'检定成功':'检定失败 · 仍可购买');
+    return modal('选择货物',`<div class="offer-line">${offerPrice(e.card.offer)}<span>挑 1 件，或直接走。</span></div>`+
+      cardRow(e.goods.map((c,i)=>itemCard(c,'buy',i,!possible)).join(''))+(!possible?'<p class="hint">付不起，或同行的包都满了。</p>':''),button('不购买','leave','','primary'),true,e.success?'掷骰成功':'掷骰失败，照样能买');
   }
   if(g.phase==='choice'){
     const p=g.pending;
-    return modal(p.title,`<div class="choice-list">${p.options.map((o,i)=>button(escape(o.label),'choice',i)).join('')}</div>`);
+    return modal(({选择弃置物品:'扔掉哪件物品？',选择付款物:'拿哪件东西换？',选择接收者:'谁来拿？'})[p.title]??p.title,`<div class="choice-list">${p.options.map((o,i)=>button(escape(o.label),'choice',i)).join('')}</div>`);
   }
   if(g.phase==='orient')return '';
   return '';

@@ -1,4 +1,4 @@
-import {ROLES} from './rules.mjs?v=093';
+import {ROLES} from './rules.mjs?p=3';
 
 const windows = {
   action:'行动前',door:'开门前',revealed:'遭遇揭晓后',
@@ -11,7 +11,7 @@ export function itemTargets(g,id,item){
   if(!win||!h.soul||g.winner||!allowed.includes(win))return [];
   if(e?!e.party.includes(id)&&!(h.state==='explored'&&samePlace(h,g.buyer)):id!==g.turn)return [];
   if(fx==='sprint')return g.reachable(h.pos).filter(p=>p!==h.pos).map(p=>({arg:p,label:`房间 ${p+1}`}));
-  if(fx==='insight')return g.slots.flatMap((s,i)=>s&&!s.open?[{arg:i,label:`翻明 ${s.card.tier} 级埋牌`}]:[]);
+  if(fx==='insight')return g.slots.flatMap((s,i)=>s&&!s.open?[{arg:i,label:`亮出这张 ${s.card.tier} 级牌`}]:[]);
   if(fx==='peek')return g.goods.length?[{label:'查看堆顶'}]:[];
   if(fx==='transform')return ROLES.filter(r=>r!==h.specialty).map(r=>({arg:r,label:r}));
   if(fx==='replaceEncounter')return !e.replaced&&(g.events.length||g.eventDiscard.length)?[{label:'另抽一张'}]:[];
@@ -36,12 +36,12 @@ export function applyItem(g,id,uid,index){
   const arg=choice.arg;
   switch(item.effect){
     case 'sprint':{const from=h.pos;g.move(id,arg);g.attach();g.note(`${h.name} 疾跑 ${from+1} → ${arg+1}`);break;}
-    case 'insight':g.slots[arg].open=true;g.note(`洞察翻明 ${g.slots[arg].card.name}。`);break;
-    case 'peek':g.note(`物资堆顶：${g.goods[0].name}。`);break;
+    case 'insight':g.slots[arg].open=true;g.note(`亮牌：「${g.slots[arg].card.name}」还留在原位。`);break;
+    case 'peek':g.note(`货堆最上面是「${g.goods[0].name}」。`);break;
     case 'transform':h.specialty=arg;break;
     case 'replaceEncounter':{
       const fresh=g.drawEvents(1)[0];g.eventDiscard.push(e.card);e.card=fresh;e.replaced=true;
-      g.note(`逆天改命：新遭遇为 ${fresh.name}。`);break;
+      g.note(`换了一扇门。新遭遇是「${fresh.name}」。`);break;
     }
     case 'substitute':if(g.phase==='damage')e.damage.target=arg;else g.bearer(arg);break;
     case 'heal1':case 'heal2':g.heal(arg,item.effect==='heal2'?2:1);break;

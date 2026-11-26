@@ -1,9 +1,9 @@
-import {blockedDoor,neighbor} from './map.mjs?v=093';
+import {blockedDoor,neighbor} from './map.mjs?p=3';
 
 export function taskHint(history,patterns){
-  if(history.length<2)return {needed:[],label:history.length?'再记录一次成功探索':'成功探索后记录纹样'};
-  if(history[0]===history[1])return {needed:[history[0]],label:'共鸣 · 再开一间同纹房'};
-  return {needed:patterns.filter(p=>!history.includes(p)),label:'巡礼 · 再开一间不同纹房'};
+  if(history.length<2)return {needed:[],label:history.length?'再成功开一间房':'成功开房就记纹样'};
+  if(history[0]===history[1])return {needed:[history[0]],label:'共鸣 · 下一次成功要同纹'};
+  return {needed:patterns.filter(p=>!history.includes(p)),label:'巡礼 · 下一次成功要新纹样'};
 }
 export function roomRotation(game,angle){
   const e=game.encounter;

@@ -3,11 +3,11 @@
     {
       "id": "DEMO-REW-1",
       "tier": 1,
-      "name": "洞察",
+      "name": "窥门镜",
       "equipment": false,
       "timing": "行动前／开门前",
       "effect": "insight",
-      "text": "翻明一张尚未使用的埋牌，保留原位。",
+      "text": "选一张盖着的埋牌亮牌。",
       "windows": [
         "行动前",
         "开门前"
@@ -20,11 +20,11 @@
     {
       "id": "DEMO-REW-2",
       "tier": 1,
-      "name": "磨口铜哨",
+      "name": "圆盾",
       "equipment": false,
       "timing": "掷前",
       "effect": "guard",
-      "text": "承担者护魂 1。",
+      "text": "替本场出手的人挡伤 1。",
       "windows": [
         "检定前"
       ],
@@ -40,7 +40,7 @@
       "equipment": false,
       "timing": "掷后",
       "effect": "reroll",
-      "text": "选一颗骰重掷，采用新骰面。",
+      "text": "选一颗骰子重掷，用新的点数。",
       "windows": [
         "检定后"
       ],
@@ -52,11 +52,11 @@
     {
       "id": "DEMO-REW-4",
       "tier": 1,
-      "name": "旧皮护腕",
+      "name": "皮护腕",
       "equipment": false,
       "timing": "掷前",
       "effect": "guard",
-      "text": "承担者护魂 1。",
+      "text": "替本场出手的人挡伤 1。",
       "windows": [
         "检定前"
       ],
@@ -68,11 +68,11 @@
     {
       "id": "DEMO-REW-5",
       "tier": 1,
-      "name": "半瓶回魂水",
+      "name": "回魂药",
       "equipment": false,
       "timing": "掷前",
       "effect": "heal1",
-      "text": "承担者恢复 1 魂。",
+      "text": "选同一间房里的一人，回魂 1。可以选自己。",
       "windows": [
         "检定前"
       ],
@@ -84,11 +84,11 @@
     {
       "id": "DEMO-REW-6",
       "tier": 1,
-      "name": "疾跑",
+      "name": "跑鞋",
       "equipment": false,
       "timing": "自由时机",
       "effect": "sprint",
-      "text": "将持有者沿已探索门路移动到另一间旧房，不花行动，不恢复资格。",
+      "text": "沿走过的门跑到另一间已开的房。免费走这趟，本轮行动次数照旧。",
       "windows": [
         "行动前"
       ],
@@ -100,11 +100,11 @@
     {
       "id": "DEMO-REW-7",
       "tier": 1,
-      "name": "逆天改命",
+      "name": "换门钥匙",
       "equipment": false,
       "timing": "遭遇揭晓后",
       "effect": "replaceEncounter",
-      "text": "公开弃置本场遭遇，从公共遭遇堆另抽一张，必须使用新牌；不动其他埋牌。",
+      "text": "弃掉眼前的遭遇，从遭遇牌堆抽一张替换。其他埋牌留在原位。",
       "windows": [
         "遭遇揭晓后"
       ],
@@ -118,11 +118,11 @@
     {
       "id": "DEMO-REW-8",
       "tier": 1,
-      "name": "绷带夹板",
+      "name": "绷带",
       "equipment": false,
       "timing": "掷前",
       "effect": "heal1",
-      "text": "承担者恢复 1 魂。",
+      "text": "选同一间房里的一人，回魂 1。可以选自己。",
       "windows": [
         "检定前"
       ],
@@ -134,11 +134,11 @@
     {
       "id": "DEMO-REW-9",
       "tier": 1,
-      "name": "歪嘴罗盘",
+      "name": "看货镜",
       "equipment": false,
       "timing": "准备",
       "effect": "peek",
-      "text": "查看普通物资堆顶一张，随后原样放回。",
+      "text": "看物资牌堆顶的一张牌，原样放回。",
       "windows": [
         "行动前"
       ],
@@ -150,11 +150,11 @@
     {
       "id": "DEMO-REW-10",
       "tier": 1,
-      "name": "补钉短矛",
+      "name": "短矛",
       "equipment": false,
       "timing": "掷前",
       "effect": "battleBoost",
-      "text": "仅战斗。增势 1。",
+      "text": "只在战斗中用，给冒险者 1 个优势。",
       "windows": [
         "检定前"
       ],
@@ -166,11 +166,11 @@
     {
       "id": "DEMO-REW-11",
       "tier": 1,
-      "name": "变形术",
+      "name": "变形药",
       "equipment": false,
       "timing": "行动前／开门前",
       "effect": "transform",
-      "text": "持有者本轮改用指定专长，魂上限和容量保持原值。",
+      "text": "给自己换一种专长，持续到本轮结束。",
       "windows": [
         "行动前",
         "开门前"
@@ -184,11 +184,11 @@
     {
       "id": "DEMO-REW-12",
       "tier": 1,
-      "name": "软木飞镖",
+      "name": "加一点的骰油",
       "equipment": false,
       "timing": "掷后",
       "effect": "plus1",
-      "text": "选一颗骰加 1，上限 20。",
+      "text": "选一颗骰子，点数加 1，最高 20。",
       "windows": [
         "检定后"
       ],
@@ -200,11 +200,11 @@
     {
       "id": "DEMO-REW-13",
       "tier": 1,
-      "name": "褶纸斗篷",
+      "name": "皮斗篷",
       "equipment": false,
       "timing": "掷前",
       "effect": "guard",
-      "text": "承担者护魂 1。",
+      "text": "替本场出手的人挡伤 1。",
       "windows": [
         "检定前"
       ],
@@ -220,7 +220,7 @@
       "equipment": false,
       "timing": "受伤前／检定前",
       "effect": "substitute",
-      "text": "开门前或非交易检定前换一名同行承担；受伤前可改由存活同行承伤。",
+      "text": "开门前或非交易掷骰前，可以换同行出手。单人受伤前，也能改由另一名同行挨这一下。",
       "windows": [
         "开门前",
         "检定前",
@@ -234,11 +234,11 @@
     {
       "id": "DEMO-REW-15",
       "tier": 1,
-      "name": "三寸镜",
+      "name": "翻盘镜",
       "equipment": false,
       "timing": "掷前",
       "effect": "reverse",
-      "text": "反转当前净优势与净劣势。",
+      "text": "逆转双方当前的优势。",
       "windows": [
         "检定前"
       ],
@@ -250,11 +250,11 @@
     {
       "id": "DEMO-REW-17",
       "tier": 2,
-      "name": "急救灯",
+      "name": "急救包",
       "equipment": false,
       "timing": "掷前",
       "effect": "heal2",
-      "text": "承担者恢复 2 魂。",
+      "text": "选同一间房里的一人，回魂 2。可以选自己。",
       "windows": [
         "检定前"
       ],
@@ -266,11 +266,11 @@
     {
       "id": "DEMO-REW-18",
       "tier": 2,
-      "name": "两不相欠",
+      "name": "单骰符",
       "equipment": false,
       "timing": "开门前／检定前",
       "effect": "forceNormal",
-      "text": "锁定本场为均势，单骰且无优势魂。",
+      "text": "本场改用单骰。",
       "windows": [
         "开门前",
         "检定前"
@@ -283,11 +283,11 @@
     {
       "id": "DEMO-REW-19",
       "tier": 2,
-      "name": "回弹肩甲",
+      "name": "带刺的盾",
       "equipment": false,
       "timing": "掷前",
       "effect": "boostGuard",
-      "text": "增势 1，承担者护魂 1。",
+      "text": "给冒险者 1 个优势，并替出手的人挡伤 1。",
       "windows": [
         "检定前"
       ],
@@ -299,11 +299,11 @@
     {
       "id": "DEMO-REW-21",
       "tier": 3,
-      "name": "第二颗心脏",
+      "name": "分给大家的药",
       "equipment": false,
       "timing": "掷前",
       "effect": "healAll",
-      "text": "全队各恢复 1 魂。",
+      "text": "你这间房里的冒险者各回魂 1。",
       "windows": [
         "检定前"
       ],
@@ -315,11 +315,11 @@
     {
       "id": "DEMO-REW-22",
       "tier": 3,
-      "name": "借来的明天",
+      "name": "保命符",
       "equipment": false,
       "timing": "掷前",
       "effect": "coffin",
-      "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
+      "text": "本房第一次要掉到 0 魂时，出手的人留 1 魂。",
       "windows": [
         "检定前"
       ],
@@ -331,11 +331,11 @@
     {
       "id": "DEMO-REW-23",
       "tier": 3,
-      "name": "刻着二十的骨签",
+      "name": "二十点骰",
       "equipment": false,
       "timing": "掷后",
       "effect": "twenty",
-      "text": "将选中的骰面改为 20。",
+      "text": "选一颗骰子，直接改成 20。",
       "windows": [
         "检定后"
       ],
@@ -347,11 +347,11 @@
     {
       "id": "DEMO-REW-24",
       "tier": 3,
-      "name": "反相线圈",
+      "name": "照回去的盾",
       "equipment": false,
       "timing": "掷前",
       "effect": "reverseGuard",
-      "text": "反转当前净势，承担者护魂 1。",
+      "text": "逆转双方当前的优势，再替出手的人挡伤 1。",
       "windows": [
         "检定前"
       ],
@@ -363,11 +363,11 @@
     {
       "id": "DEMO-REW-25",
       "tier": 3,
-      "name": "环形屏障",
+      "name": "塔盾",
       "equipment": false,
       "timing": "掷前",
       "effect": "guard2",
-      "text": "承担者护魂 2。",
+      "text": "替本场出手的人挡伤 2。",
       "windows": [
         "检定前"
       ],
@@ -378,51 +378,51 @@
     },
     {
       "id": "IV-ITEM-01",
-      "name": "余火匣",
+      "name": "药汤锅",
       "tier": 4,
       "effect": "healAll",
       "windows": [
         "检定前"
       ],
-      "text": "与持有者同房的冒险者各恢复1魂。"
+      "text": "你这间房里的冒险者各回魂 1。"
     },
     {
       "id": "IV-ITEM-02",
-      "name": "斜齿骰垫",
+      "name": "十点骰垫",
       "tier": 4,
       "effect": "floor10",
       "windows": [
         "检定后"
       ],
-      "text": "选择一颗骰，将低于10的骰面改为10。取骰规则保持不变。"
+      "text": "选一颗骰子，低于 10 就改成 10。"
     },
     {
       "id": "IV-ITEM-03",
-      "name": "校准砝码",
+      "name": "加两点的骰油",
       "tier": 4,
       "effect": "plus2",
       "windows": [
         "检定后"
       ],
-      "text": "选一颗骰，将骰面加2，最高20。"
+      "text": "选一颗骰子，点数加 2，最高 20。"
     },
     {
       "id": "IV-ITEM-04",
-      "name": "薄钢护环",
+      "name": "铁盾",
       "tier": 4,
       "effect": "guard2",
       "windows": [
         "检定前"
       ],
-      "text": "抵挡本场即将失去的至多2魂。"
+      "text": "替本场出手的人挡伤 2。"
     }
   ],
   "loot": {
     "MON-I-01": {
-      "name": "会打嗝的胃囊",
+      "name": "蛙肚里的备用骰",
       "equipment": false,
       "timing": "掷后",
-      "text": "重投1，必须接受新值。",
+      "text": "选一颗骰子重掷，用新的点数。",
       "effect": "reroll",
       "originalKind": "道具",
       "inventoryType": "unified",
@@ -430,10 +430,10 @@
       "id": "MON-I-01"
     },
     "MON-I-02": {
-      "name": "反穿的鳞片",
+      "name": "蜥皮盾",
       "equipment": false,
       "timing": "掷前",
-      "text": "一人护魂1。",
+      "text": "替本场出手的人挡伤 1。",
       "effect": "guard",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -441,10 +441,10 @@
       "id": "MON-I-02"
     },
     "MON-I-03": {
-      "name": "唱反调的眼球",
+      "name": "看门的眼珠",
       "equipment": false,
       "timing": "开门前",
-      "text": "翻明一张未使用的遭遇，保持明牌与原位，不立即结算。",
+      "text": "选一张盖着的埋牌亮牌。",
       "effect": "insight",
       "windows": [
         "行动前",
@@ -456,10 +456,10 @@
       "id": "MON-I-03"
     },
     "MON-I-04": {
-      "name": "借来的第三只手",
+      "name": "甲虫盾",
       "equipment": false,
       "timing": "掷前",
-      "text": "承担者护魂 2。",
+      "text": "替本场出手的人挡伤 2。",
       "effect": "guard2",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -467,10 +467,10 @@
       "id": "MON-I-04"
     },
     "MON-II-01": {
-      "name": "弹簧触须",
+      "name": "鱿鱼的弹簧盾",
       "equipment": false,
       "timing": "掷前",
-      "text": "增势1，一人护魂1。",
+      "text": "给冒险者 1 个优势，并替出手的人挡伤 1。",
       "effect": "boostGuard",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -478,10 +478,10 @@
       "id": "MON-II-01"
     },
     "MON-II-02": {
-      "name": "肚里的小太阳",
+      "name": "鱼油急救包",
       "equipment": false,
       "timing": "掷前",
-      "text": "一人恢复2。",
+      "text": "选同一间房里的一人，回魂 2。可以选自己。",
       "effect": "heal2",
       "originalKind": "道具",
       "inventoryType": "unified",
@@ -489,10 +489,10 @@
       "id": "MON-II-02"
     },
     "MON-II-03": {
-      "name": "不合脸的面具",
+      "name": "青蛙面具",
       "equipment": false,
       "timing": "掷前",
-      "text": "逆转。一人护魂1。",
+      "text": "逆转双方当前的优势，再替出手的人挡伤 1。",
       "effect": "reverseGuard",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -500,10 +500,10 @@
       "id": "MON-II-03"
     },
     "MON-III-01": {
-      "name": "软塌塌的王冠",
+      "name": "抢来的王冠",
       "equipment": false,
       "timing": "掷前",
-      "text": "本次玩家优势来源不足以超过城主时，增加至比城主多1。",
+      "text": "如果冒险者没占上风，立刻改为冒险者占优。",
       "effect": "crown",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -511,10 +511,10 @@
       "id": "MON-III-01"
     },
     "MON-III-02": {
-      "name": "随身小棺材",
+      "name": "棺材保命符",
       "equipment": false,
       "timing": "掷前",
-      "text": "承担者本房首次将降至 0 魂时，保留 1 魂。",
+      "text": "本房第一次要掉到 0 魂时，出手的人留 1 魂。",
       "effect": "coffin",
       "originalKind": "装备",
       "inventoryType": "unified",
@@ -522,10 +522,10 @@
       "id": "MON-III-02"
     },
     "MON-III-03": {
-      "name": "嚼不烂的灯芯",
+      "name": "兽肚里的二十点骰",
       "equipment": false,
       "timing": "掷后",
-      "text": "将一颗当前检定骰改为20。",
+      "text": "选一颗骰子，直接改成 20。",
       "effect": "twenty",
       "originalKind": "道具",
       "inventoryType": "unified",
@@ -534,23 +534,23 @@
     },
     "MON-II-04": {
       "id": "MON-II-04",
-      "name": "吞屑貘的铜牙",
+      "name": "貘牙盾",
       "tier": 2,
       "effect": "guard2",
       "windows": [
         "检定前"
       ],
-      "text": "这场遭遇抵挡接下来至多2点失魂。"
+      "text": "替本场出手的人挡伤 2。"
     },
     "MON-IV-02": {
       "id": "MON-IV-02",
-      "name": "缝门蛛的第二线轴",
+      "name": "蛛丝镜盾",
       "tier": 4,
       "effect": "reverseGuard",
       "windows": [
         "检定前"
       ],
-      "text": "逆转当前优势，并抵挡本场接下来1点失魂。"
+      "text": "逆转双方当前的优势，再替出手的人挡伤 1。"
     }
   }
 }

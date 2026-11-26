@@ -1,6 +1,6 @@
-import {PATTERNS,frontiers,neighbor} from './map.mjs?v=093';
-import {recordPattern,TASK_REWARD} from './rules.mjs?v=093';
-import {applyItem,itemTargets} from './items.mjs?v=093';
+import {PATTERNS,frontiers,neighbor} from './map.mjs?p=3';
+import {recordPattern,TASK_REWARD} from './rules.mjs?p=3';
+import {applyItem,itemTargets} from './items.mjs?p=3';
 
 function patternRisk(g,p){
   if(g.excluded.has(p))return 0;
